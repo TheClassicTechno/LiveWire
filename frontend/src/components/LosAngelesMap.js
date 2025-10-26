@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useCity } from '../contexts/CityContext';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './LosAngelesMap.css';
 
 // Modular utilities
-import { CITY_CONFIG, getNextCity } from '../data/cityConfig';
+import { CITY_CONFIG, getNextCity, getPrevCity } from '../data/cityConfig';
 import { useTransmissionDataByCity } from '../hooks/useTransmissionDataByCity';
 
 // Set your Mapbox access token
@@ -71,6 +71,23 @@ const LosAngelesMap = () => {
 
     if (map.current) {
       const cityConfig = CITY_CONFIG[nextCity];
+      map.current.flyTo({
+        center: cityConfig.center,
+        zoom: cityConfig.zoom,
+        pitch: cityConfig.pitch,
+        bearing: cityConfig.bearing,
+        duration: 2500,
+        easing: (t) => t * (2 - t) // Smooth easing
+      });
+    }
+  };
+
+  const switchToPrevCity = () => {
+    const prevCity = getPrevCity(currentCity);
+    setCurrentCity(prevCity);
+
+    if (map.current) {
+      const cityConfig = CITY_CONFIG[prevCity];
       map.current.flyTo({
         center: cityConfig.center,
         zoom: cityConfig.zoom,
@@ -272,8 +289,19 @@ const LosAngelesMap = () => {
         transition={{ duration: 0.6, delay: 0.5 }}
       >
         <div className="overview-title">
+          <motion.button
+            className="city-switch-btn"
+            onClick={switchToPrevCity}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.6 }}
+          >
+            <ChevronLeft size={20} />
+          </motion.button>
           {getCityName()}
-          <motion.button 
+          <motion.button
             className="city-switch-btn"
             onClick={switchCity}
             whileHover={{ scale: 1.1 }}

@@ -13,14 +13,14 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useCity } from '../../contexts/CityContext';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '../LosAngelesMap.css';
 
 // Import configuration and utilities
-import { CITY_CONFIG, getNextCity } from '../../data/cityConfig';
+import { CITY_CONFIG, getNextCity, getPrevCity } from '../../data/cityConfig';
 import { addMapLayers } from './MapLayers';
 import { useMapClickHandlers } from '../../hooks/useMapClickHandlers';
 import { useMapHoverEffects } from '../../hooks/useMapHoverEffects';
@@ -89,6 +89,26 @@ const CableNetworkMap = () => {
 
     if (map.current) {
       const cityConfig = CITY_CONFIG[nextCity];
+      map.current.flyTo({
+        center: cityConfig.center,
+        zoom: cityConfig.zoom,
+        pitch: cityConfig.pitch,
+        bearing: cityConfig.bearing,
+        duration: 2500,
+        easing: (t) => t * (2 - t)
+      });
+    }
+  }, [currentCity, setCurrentCity]);
+
+  /**
+   * Switch to previous city
+   */
+  const handlePrevCitySwitch = useCallback(() => {
+    const prevCity = getPrevCity(currentCity);
+    setCurrentCity(prevCity);
+
+    if (map.current) {
+      const cityConfig = CITY_CONFIG[prevCity];
       map.current.flyTo({
         center: cityConfig.center,
         zoom: cityConfig.zoom,

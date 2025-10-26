@@ -8,7 +8,9 @@ import {
   Menu,
   X,
   AlertTriangle,
-  Radio
+  Radio,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCity } from '../contexts/CityContext';
@@ -28,28 +30,39 @@ const Dashboard = () => {
     navigate('/');
   };
 
-  // Map tab IDs to city configuration keys
-  const cityMap = {
-    'paradise': 'paradise-city',
-    'la': 'los-angeles',
-    'sf': 'san-francisco'
-  };
+  const cities = [
+    { id: 'paradise', label: 'Paradise (Camp Fire)', key: 'paradise-city' },
+    { id: 'la', label: 'Los Angeles', key: 'los-angeles' },
+    { id: 'sf', label: 'San Francisco', key: 'san-francisco' },
+  ];
 
-  const tabs = [
-    { id: 'paradise', label: 'Paradise (Camp Fire)', icon: AlertTriangle },
-    { id: 'la', label: 'Los Angeles', icon: Activity },
-    { id: 'sf', label: 'San Francisco', icon: Activity },
+  const mainTabs = [
     { id: 'live', label: 'Live Data', icon: Radio },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'economic', label: 'Economic Assessment', icon: DollarSign },
   ];
 
+  const [currentCityIndex, setCurrentCityIndex] = useState(0);
+
+  const tabs = mainTabs;
+  const currentCity = cities[currentCityIndex];
+
+  // Navigate between cities
+  const handlePrevCity = () => {
+    const newIndex = (currentCityIndex - 1 + cities.length) % cities.length;
+    setCurrentCityIndex(newIndex);
+    setCurrentCity(cities[newIndex].key);
+  };
+
+  const handleNextCity = () => {
+    const newIndex = (currentCityIndex + 1) % cities.length;
+    setCurrentCityIndex(newIndex);
+    setCurrentCity(cities[newIndex].key);
+  };
+
   // Update city context when tab changes
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    if (cityMap[tabId]) {
-      setCurrentCity(cityMap[tabId]);
-    }
   };
 
   const renderContent = () => {
@@ -142,15 +155,37 @@ const Dashboard = () => {
       <main className="main-content">
         <header className="content-header">
           <div className="header-info">
-            <h1 className="page-title">
-              {tabs.find(tab => tab.id === activeTab)?.label}
-            </h1>
+            {activeTab !== 'analytics' && activeTab !== 'economic' && activeTab !== 'live' && (
+              <div className="city-navigator">
+                <button
+                  className="city-nav-btn"
+                  onClick={handlePrevCity}
+                  aria-label="Previous city"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <h1 className="page-title">{currentCity.label}</h1>
+                <button
+                  className="city-nav-btn"
+                  onClick={handleNextCity}
+                  aria-label="Next city"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            )}
+            {(activeTab === 'analytics' || activeTab === 'economic' || activeTab === 'live') && (
+              <h1 className="page-title">
+                {tabs.find(tab => tab.id === activeTab)?.label}
+              </h1>
+            )}
             <p className="page-subtitle">
               {activeTab === 'paradise' && 'Real transmission grid - 2018 Camp Fire case study with Tower 27/222'}
               {activeTab === 'la' && 'Real transmission grid visualization for Los Angeles area'}
               {activeTab === 'sf' && 'Real transmission grid visualization for San Francisco area'}
               {activeTab === 'analytics' && 'Detailed analysis of transmission line parameters and risk trends'}
               {activeTab === 'economic' && 'Cost analysis and economic impact assessment'}
+              {activeTab === 'live' && 'Real-time transmission line data and system metrics'}
             </p>
           </div>
           

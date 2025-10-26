@@ -52,6 +52,16 @@ export const getNextCity = (currentCity) => {
 };
 
 /**
+ * Get previous city in rotation
+ */
+export const getPrevCity = (currentCity) => {
+  const cities = Object.keys(CITY_CONFIG);
+  const currentIndex = cities.indexOf(currentCity);
+  const prevIndex = (currentIndex - 1 + cities.length) % cities.length;
+  return cities[prevIndex];
+};
+
+/**
  * Get all available cities
  */
 export const getAllCities = () => Object.keys(CITY_CONFIG);
