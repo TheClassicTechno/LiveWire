@@ -15,16 +15,43 @@ import numpy as np
 from datetime import datetime, timedelta
 import json
 import requests
+import base64
 import time
 from models.grid_risk_model import CCIPipeline, CCIPipelineConfig
 
 class LiveWireElasticPredictor:
     """Real-time CCI prediction using Elastic data and Grid Risk Model"""
     
-    def __init__(self, elastic_url="http://localhost:9200"):
-        self.elastic_url = elastic_url
-        self.elastic_index = "livewire-sensors"
-        self.alert_index = "livewire-alerts"
+    def __init__(self, cloud_id=None, api_key=None):
+        # Load Elastic Serverless credentials if not provided
+        if cloud_id and api_key:
+            self.cloud_id = cloud_id
+            self.api_key = api_key
+        else:
+            try:
+                with open('elastic/credentials.json', 'r') as f:
+                    creds = json.load(f)
+                    self.cloud_id = creds['cloud_id']
+                    self.api_key = creds['api_key']
+            except:
+                print("❌ No Elastic credentials found. Using localhost fallback.")
+                self.cloud_id = None
+                self.api_key = None
+        
+        # Setup Elastic connection
+        if self.cloud_id and self.api_key:
+            self.elastic_url = self.parse_cloud_id(self.cloud_id)
+            self.headers = {
+                'Authorization': f'ApiKey {self.api_key}',
+                'Content-Type': 'application/json'
+            }
+            self.elastic_index = "metrics-livewire.sensors-default"
+            self.alert_index = "logs-livewire.alerts-default"
+        else:
+            self.elastic_url = "http://localhost:9200"
+            self.headers = {'Content-Type': 'application/json'}
+            self.elastic_index = "livewire-sensors"
+            self.alert_index = "livewire-alerts"
         
         # Initialize CCI model with optimized config for real-time data
         self.setup_cci_model()
@@ -36,6 +63,32 @@ class LiveWireElasticPredictor:
         }
         
         print("🔥 LiveWire Elastic Predictor initialized")
+    
+    def parse_cloud_id(self, cloud_id):
+        """Parse Cloud ID to extract Elasticsearch endpoint"""
+        try:
+            if cloud_id.startswith('https://'):
+                return cloud_id.rstrip('/')
+            
+            if ':' in cloud_id:
+                try:
+                    encoded_part = cloud_id.split(':')[1]
+                    decoded = base64.b64decode(encoded_part + '===').decode('utf-8')
+                    parts = decoded.split('$')
+                    domain = parts[0]
+                    es_uuid = parts[1]
+                    return f"https://{es_uuid}.{domain}"
+                except:
+                    pass
+            
+            if not cloud_id.startswith('http'):
+                cloud_id = f"https://{cloud_id}"
+            
+            return cloud_id.rstrip('/')
+        except Exception as e:
+            if not cloud_id.startswith('http'):
+                return f"https://{cloud_id}"
+            return cloud_id
     
     def setup_cci_model(self):
         """Setup optimized Grid Risk Model for real-time prediction"""
@@ -103,7 +156,7 @@ class LiveWireElasticPredictor:
         
         try:
             response = requests.post(f"{self.elastic_url}/{self.elastic_index}/_search",
-                                   json=query, headers={'Content-Type': 'application/json'})
+                                   json=query, headers=self.headers)
             
             if response.status_code == 200:
                 hits = response.json()['hits']['hits']
@@ -230,7 +283,7 @@ class LiveWireElasticPredictor:
             
             try:
                 response = requests.post(f"{self.elastic_url}/{self.alert_index}/_doc",
-                                       json=alert, headers={'Content-Type': 'application/json'})
+                                       json=alert, headers=self.headers)
                 
                 if response.status_code == 201:
                     print(f"🚨 {alert_level.upper()} ALERT sent for {component_id}")

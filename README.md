@@ -110,6 +110,55 @@ Multiple approaches: ~50% accuracy ⚠️ POOR (proves data gap)
 - Estimate time-to-critical-failure
 - Alert when action needed
 
+### 4. Real-Time Architecture (Elastic Serverless)
+
+#### Complete System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                           LiveWire Real-Time Infrastructure Monitoring              │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────────┐
+│  Raspberry Pi   │───▶│ Elastic Serverless│───▶│  Processing Apps    │
+│    Sensors      │    │    (Database)     │    │                     │
+│                 │    │                   │    │                     │
+│ • Temperature   │    │ • Agent Builder   │    │ • Real-time Reader  │
+│ • Vibration     │    │ • Data Streams    │    │ • CCI Predictions   │
+│ • Strain        │    │ • Time-series     │    │ • Risk Assessment   │
+│ • Power Load    │    │ • Real-time Sync  │    │ • Alert Generation  │
+│                 │    │                   │    │                     │
+│ Risk Analysis:  │    │ Data Streams:     │    │ Output:             │
+│ • Green Zone    │    │ • metrics-livewire│    │ • Green/Yellow/Red  │
+│ • Yellow Zone   │    │ • logs-livewire   │    │ • Confidence %      │
+│ • Red Zone      │    │ • Auto-indexing   │    │ • Time-to-failure   │
+└─────────────────┘    └──────────────────┘    └─────────────────────┘
+      (Producer)           (Database Layer)         (Consumer Apps)
+```
+
+#### Producer/Consumer Architecture
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────────┐
+│   Pi Writer     │───▶│ Elastic Serverless│───▶│  Real-time Reader   │
+│                 │    │    (Database)     │    │                     │
+│ • Collect data  │    │ • Store data      │    │ • Query new data    │
+│ • Write to DB   │    │ • Index/search    │    │ • Process with CCI  │
+│ • Loop forever  │    │ • Real-time sync  │    │ • Risk assessment   │
+└─────────────────┘    └──────────────────┘    └─────────────────────┘
+    (Producer)              (Database)              (Consumer)
+```
+
+**Key Features:**
+- **Raspberry Pi sensors** collect 4 float values: temperature, vibration, strain, power
+- **Edge processing** applies real-time risk assessment (green/yellow/red zones)
+- **Elastic Serverless** provides enterprise-grade data storage and retrieval
+- **Agent Builder framework** structures data for optimal processing
+- **Multiple consumers** can read the same sensor data simultaneously
+- **Complete separation** between data collection and processing
+- **Scalable architecture** supports multiple sensors and consumers
+- **Professional monitoring** with confidence scores and time-to-failure estimates
+
 ---
 
 ## 📁 Project Structure
@@ -127,6 +176,20 @@ LiveWire/
 │   ├── test_ultra_optimized_models.py   # 65.7% optimization
 │   ├── run_all_analyses.py              # One-command execution
 │   └── [8 more comprehensive tests]
+│
+├── elastic/                              # Real-time Infrastructure
+│   ├── elastic_agent.py                 # Agent Builder implementation
+│   ├── serverless_setup.py              # Elastic Serverless config
+│   ├── realtime_predictor.py            # Live CCI predictions
+│   └── credentials.json                 # Connection config
+│
+├── hardware/                             # IoT Integration
+│   └── raspberry_pi_sensor.py           # Pi sensor simulation
+│
+├── database/                             # Producer/Consumer Demo
+│   ├── pi_writer.py                     # Data producer (Pi side)
+│   ├── realtime_reader.py               # Data consumer (processing)
+│   └── demo_architecture.py             # Full demo
 │
 ├── utils/                                # Data Pipeline (Your work)
 │   ├── cascade_failures_loader.py       # Topology → time-series

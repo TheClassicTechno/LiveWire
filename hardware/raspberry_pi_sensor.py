@@ -15,16 +15,43 @@ import time
 import random
 import json
 import requests
+import base64
 from datetime import datetime, timezone
 import numpy as np
 
 class RaspberryPiSensor:
     """Simulates Raspberry Pi sensor readings for cable infrastructure monitoring"""
     
-    def __init__(self, component_id="CABLE_001", elastic_url="http://localhost:9200"):
+    def __init__(self, component_id="CABLE_001", cloud_id=None, api_key=None):
         self.component_id = component_id
-        self.elastic_url = elastic_url
-        self.elastic_index = "livewire-sensors"
+        
+        # Load Elastic Serverless credentials if not provided
+        if cloud_id and api_key:
+            self.cloud_id = cloud_id
+            self.api_key = api_key
+        else:
+            try:
+                with open('elastic/credentials.json', 'r') as f:
+                    creds = json.load(f)
+                    self.cloud_id = creds['cloud_id']
+                    self.api_key = creds['api_key']
+            except:
+                print("❌ No Elastic credentials found. Using localhost fallback.")
+                self.cloud_id = None
+                self.api_key = None
+        
+        # Setup Elastic connection
+        if self.cloud_id and self.api_key:
+            self.elastic_url = self.parse_cloud_id(self.cloud_id)
+            self.headers = {
+                'Authorization': f'ApiKey {self.api_key}',
+                'Content-Type': 'application/json'
+            }
+            self.elastic_index = "metrics-livewire.sensors-default"
+        else:
+            self.elastic_url = "http://localhost:9200"
+            self.headers = {'Content-Type': 'application/json'}
+            self.elastic_index = "livewire-sensors"
         
         # Sensor calibration (realistic ranges for cable monitoring)
         self.temp_baseline = 25.0      # °C - normal operating temperature
@@ -33,7 +60,33 @@ class RaspberryPiSensor:
         self.power_baseline = 1000.0   # W - normal power load
         
         print(f"Initialized sensor for component: {component_id}")
-        print(f"Elastic endpoint: {elastic_url}")
+        print(f"Elastic endpoint: {self.elastic_url}")
+    
+    def parse_cloud_id(self, cloud_id):
+        """Parse Cloud ID to extract Elasticsearch endpoint"""
+        try:
+            if cloud_id.startswith('https://'):
+                return cloud_id.rstrip('/')
+            
+            if ':' in cloud_id:
+                try:
+                    encoded_part = cloud_id.split(':')[1]
+                    decoded = base64.b64decode(encoded_part + '===').decode('utf-8')
+                    parts = decoded.split('$')
+                    domain = parts[0]
+                    es_uuid = parts[1]
+                    return f"https://{es_uuid}.{domain}"
+                except:
+                    pass
+            
+            if not cloud_id.startswith('http'):
+                cloud_id = f"https://{cloud_id}"
+            
+            return cloud_id.rstrip('/')
+        except Exception as e:
+            if not cloud_id.startswith('http'):
+                return f"https://{cloud_id}"
+            return cloud_id
     
     def read_sensors(self):
         """Read current sensor values with realistic cable monitoring ranges"""
@@ -80,7 +133,7 @@ class RaspberryPiSensor:
         
         try:
             response = requests.put(f"{self.elastic_url}/{self.elastic_index}", 
-                                  json=mapping, headers={'Content-Type': 'application/json'})
+                                  json=mapping, headers=self.headers)
             if response.status_code in [200, 400]:  # 400 if index exists
                 print(f"Elastic index '{self.elastic_index}' ready")
             else:
@@ -91,20 +144,47 @@ class RaspberryPiSensor:
     def send_to_elastic(self, sensor_data, risk_zone="green", confidence=0.0):
         """Send sensor reading to Elastic with CCI prediction"""
         
-        document = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "component_id": self.component_id,
-            "temperature": sensor_data['temperature'],
-            "vibration": sensor_data['vibration'],
-            "strain": sensor_data['strain'],
-            "power": sensor_data['power'],
-            "risk_zone": risk_zone,
-            "prediction_confidence": confidence
-        }
+        # Use Elastic Serverless format if connected to serverless
+        if self.api_key:
+            document = {
+                "@timestamp": datetime.now(timezone.utc).isoformat(),
+                "agent": {
+                    "type": "raspberry-pi",
+                    "version": "1.0.0",
+                    "id": "pi-sensor-001"
+                },
+                "component_id": self.component_id,
+                "sensor_data": {
+                    "temperature": sensor_data['temperature'],
+                    "vibration": sensor_data['vibration'],
+                    "strain": sensor_data['strain'],
+                    "power": sensor_data['power']
+                },
+                "risk_zone": risk_zone,
+                "prediction_confidence": confidence,
+                "event": {
+                    "kind": "metric",
+                    "category": ["infrastructure"],
+                    "type": ["sensor"],
+                    "dataset": "livewire.sensors"
+                }
+            }
+        else:
+            # Local Elasticsearch format
+            document = {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "component_id": self.component_id,
+                "temperature": sensor_data['temperature'],
+                "vibration": sensor_data['vibration'],
+                "strain": sensor_data['strain'],
+                "power": sensor_data['power'],
+                "risk_zone": risk_zone,
+                "prediction_confidence": confidence
+            }
         
         try:
             response = requests.post(f"{self.elastic_url}/{self.elastic_index}/_doc",
-                                   json=document, headers={'Content-Type': 'application/json'})
+                                   json=document, headers=self.headers)
             
             if response.status_code == 201:
                 print(f"Data sent: T={sensor_data['temperature']}°C, "
@@ -195,7 +275,7 @@ def main():
     print(f"\n🔄 Starting live monitoring...")
     sensor.start_monitoring(interval=3.0, duration=30)
     
-    print(f"\n✅ Demo complete! Check Elastic at: http://localhost:9200/livewire-sensors/_search")
+    print(f"\nDemo complete! Check your Elastic Serverless dashboard for data")
 
 
 if __name__ == "__main__":
