@@ -11,6 +11,7 @@ import {
   Radio,
   ChevronLeft,
   ChevronRight,
+  Database,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCity } from "../contexts/CityContext";
@@ -18,6 +19,7 @@ import Analytics from "./Analytics";
 import EconomicAssessment from "./EconomicAssessment";
 import LosAngelesMap from "./LosAngelesMap";
 import LiveMetrics from "./LiveMetrics";
+import ElasticsearchDashboard from "./ElasticsearchDashboard";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -40,6 +42,7 @@ const Dashboard = () => {
     { id: "live", label: "Live Data", icon: Radio },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "economic", label: "Economic Assessment", icon: DollarSign },
+    { id: "elasticsearch", label: "Real-Time Dashboard", icon: Database },
   ];
 
   const [currentCityIndex, setCurrentCityIndex] = useState(0);
@@ -75,6 +78,9 @@ const Dashboard = () => {
     }
     if (activeTab === "live") {
       return <LiveMetrics />;
+    }
+    if (activeTab === "elasticsearch") {
+      return <ElasticsearchDashboard />;
     }
     // For all city tabs (paradise, la, sf), render the same persistent map
     // The map updates internally based on currentCity from CityContext
