@@ -467,68 +467,19 @@ const LandingPage = () => {
         >
           <nav className="mobile-nav">
             <a
-              href="#products"
-              className="mobile-nav-link"
-              onClick={toggleMobileMenu}
-            >
-              Products
-            </a>
-            <a
-              href="#solutions"
-              className="mobile-nav-link"
-              onClick={toggleMobileMenu}
-            >
-              Solutions
-            </a>
-            <a
-              href="#developers"
-              className="mobile-nav-link"
-              onClick={toggleMobileMenu}
-            >
-              Developers
-            </a>
-            <a
               href="#company"
               className="mobile-nav-link"
               onClick={toggleMobileMenu}
             >
-              Company
+              About Us
             </a>
             <a
               href="#resources"
               className="mobile-nav-link"
               onClick={toggleMobileMenu}
             >
-              Resources
+              Contact
             </a>
-            <a
-              href="#pricing"
-              className="mobile-nav-link"
-              onClick={toggleMobileMenu}
-            >
-              Pricing
-            </a>
-            <a
-              href="#contact"
-              className="mobile-nav-link"
-              onClick={toggleMobileMenu}
-            >
-              Contact us
-            </a>
-            <div className="mobile-nav-actions">
-              <button
-                className="mobile-nav-btn login-btn"
-                onClick={toggleMobileMenu}
-              >
-                Log in
-              </button>
-              <button
-                className="mobile-nav-btn signup-btn btn-electric"
-                onClick={toggleMobileMenu}
-              >
-                Sign up
-              </button>
-            </div>
           </nav>
         </motion.div>
 
