@@ -1,3 +1,101 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production builds
+build/
+dist/
+
+# Environment variables (CRITICAL - Contains API keys)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
 # Python
 __pycache__/
 *.py[cod]
@@ -16,70 +114,88 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
-# Virtual environments
-.venv/
-venv/
-ENV/
-env/
-.env
+# PyInstaller
+*.manifest
+*.spec
 
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Model artifacts and data (ignore all except final results)
-*.joblib
-*.pkl
-*.pickle
-artifacts/
+# pyenv
+.python-version
 
-# Data files (large datasets) - keep only structure
-data/raw/*.csv
-data/calib/*.csv
-data/pre_fire/*.csv
-data/camp_fire/*.csv
+# celery beat schedule file
+celerybeat-schedule
 
-# Keep only best results
-data/processed/*.csv
-!data/processed/camp_fire_predictions.csv
+# SageMath parsed files
+*.sage.py
 
-# Keep directory structure
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!data/calib/.gitkeep
-!data/pre_fire/.gitkeep
-!data/camp_fire/.gitkeep
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# Logs
-*.log
-logs/
+# Spyder project settings
+.spyderproject
+.spyproject
 
-# OS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Rope project settings
+.ropeproject
 
-# Temporary files
-*.tmp
-*.temp
-*.bak
-*.backup
+# mkdocs documentation
+/site
 
-# Kaggle API credentials
-kaggle.json
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
