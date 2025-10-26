@@ -8,7 +8,8 @@ import {
   Menu,
   X,
   AlertTriangle,
-  Radio
+  Radio,
+  Monitor
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCity } from '../contexts/CityContext';
@@ -16,6 +17,7 @@ import Analytics from './Analytics';
 import EconomicAssessment from './EconomicAssessment';
 import LosAngelesMap from './LosAngelesMap';
 import LiveMetrics from './LiveMetrics';
+import KibanaDashboard from './KibanaDashboard';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -40,6 +42,7 @@ const Dashboard = () => {
     { id: 'la', label: 'Los Angeles', icon: Activity },
     { id: 'sf', label: 'San Francisco', icon: Activity },
     { id: 'live', label: 'Live Data', icon: Radio },
+    { id: 'kibana', label: 'Kibana Dashboard', icon: Monitor },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'economic', label: 'Economic Assessment', icon: DollarSign },
   ];
@@ -62,6 +65,9 @@ const Dashboard = () => {
     }
     if (activeTab === 'live') {
       return <LiveMetrics />;
+    }
+    if (activeTab === 'kibana') {
+      return <KibanaDashboard />;
     }
     // For all city tabs (paradise, la, sf), render the same persistent map
     // The map updates internally based on currentCity from CityContext

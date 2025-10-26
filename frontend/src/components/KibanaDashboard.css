@@ -1,0 +1,193 @@
+.kibana-dashboard {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  color: white;
+  min-height: 600px;
+}
+
+.kibana-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.kibana-title h2 {
+  margin: 0 0 5px 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.kibana-title p {
+  margin: 0;
+  opacity: 0.8;
+  font-size: 14px;
+}
+
+.kibana-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.kibana-refresh-btn,
+.kibana-external-btn,
+.kibana-fallback-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.kibana-refresh-btn:hover,
+.kibana-external-btn:hover,
+.kibana-fallback-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.kibana-refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.kibana-status {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.status-item {
+  display: flex;
+  gap: 8px;
+}
+
+.status-label {
+  opacity: 0.8;
+}
+
+.status-value {
+  font-weight: 600;
+  color: #a7f3d0;
+}
+
+.kibana-container {
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.kibana-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  transition: opacity 0.3s ease;
+}
+
+.kibana-iframe.loading {
+  opacity: 0.5;
+}
+
+.kibana-iframe.hidden {
+  display: none;
+}
+
+.kibana-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #666;
+  z-index: 10;
+}
+
+.kibana-loading .loading-spinner {
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+.kibana-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #666;
+  max-width: 400px;
+  padding: 20px;
+  z-index: 10;
+}
+
+.kibana-error h3 {
+  margin: 10px 0;
+  color: #e53e3e;
+}
+
+.kibana-error ul {
+  text-align: left;
+  margin: 15px 0;
+}
+
+.kibana-error li {
+  margin: 5px 0;
+}
+
+.kibana-footer {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .kibana-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  
+  .kibana-controls {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+  
+  .kibana-status {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .kibana-container {
+    height: 400px;
+  }
+}
