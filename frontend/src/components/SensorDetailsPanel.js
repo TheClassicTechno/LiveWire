@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LineChart,
@@ -45,6 +45,9 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
   const [speedupDays, setSpeedupDays] = useState(0);
   const [speedupSummary, setSpeedupSummary] = useState(null);
   const [speedupTrendData, setSpeedupTrendData] = useState([]); // Track speedup simulation graph data
+
+  // Track panel open time for elapsed time on live graph
+  const panelOpenTimeRef = useRef(null);
 
   // Fetch sensor data from Phase 3 live component API
   const fetchSensorData = async () => {
@@ -97,10 +100,16 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
       setDataSource(statusData.data_source || 'synthetic');
       setElasticAvailable(statusData.elastic_available || false);
 
-      // Add to RUL trend data as LIVE feed (continues from baseline data's timeline)
+      // Initialize panel open time on first load
+      if (!panelOpenTimeRef.current) {
+        panelOpenTimeRef.current = Date.now();
+      }
+
+      // Add to RUL trend data as LIVE feed (shows elapsed time since panel opened)
       if (statusData.rul_prediction?.rul_hours !== undefined) {
+        const elapsedSeconds = Math.round((Date.now() - panelOpenTimeRef.current) / 1000);
         const newTrendPoint = {
-          timestamp: `${Math.round(Date.now() / 1000)}s`, // Current Unix timestamp in seconds for x-axis
+          timestamp: `${elapsedSeconds}s`, // Elapsed time since panel opened
           rul: statusData.rul_prediction.rul_hours,
           riskZone: statusData.rul_prediction.risk_zone,
           dataSource: statusData.data_source,
@@ -128,13 +137,16 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
       // Populate LIVE graph with baseline simulated data on first load
       // This shows what the component's RUL looked like over time (the "history")
       if (historyData.readings && Array.isArray(historyData.readings) && rulTrendData.length === 0) {
-        const baselineGraphData = historyData.readings.map((reading, index) => {
-          // Simulate baseline RUL: starts at 350h, gradually decreases by ~1h per reading
-          const baselineRul = Math.max(200, 350 - (index * 2));
+        const baselineGraphData = historyData.readings.map((index) => {
+          // Simulate baseline RUL: mostly stable around 300-320h with small random variations
+          // This represents the "natural" RUL trend before any dramatic degradation
+          const baseRul = 310;
+          const variation = Math.sin(index * 0.1) * 15; // Small oscillations
+          const baselineRul = baseRul + variation;
           return {
             timestamp: `${index * 2}s`, // X-axis shows elapsed seconds (0s, 2s, 4s, ... progressing left to right)
             rul: baselineRul,
-            riskZone: baselineRul > 300 ? 'green' : baselineRul > 150 ? 'yellow' : 'red',
+            riskZone: 'green', // Baseline is stable
             dataSource: 'baseline',
           };
         });
