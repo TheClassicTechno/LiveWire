@@ -260,4 +260,4 @@ python scripts/test_enhanced_neural_network_cascade_models.py
 
 ---
 
-*Built for the hackathon. Ready for production. Saving lives with better infrastructure resilience.*
+*Saving lives with better infrastructure resilience.*
