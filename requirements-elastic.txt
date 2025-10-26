@@ -1,0 +1,5 @@
+# LiveWire Elastic Integration Requirements
+# Additional dependencies for real-time sensor monitoring
+
+requests>=2.31.0
+elasticsearch>=8.0.0
