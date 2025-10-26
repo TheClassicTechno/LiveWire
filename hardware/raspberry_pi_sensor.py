@@ -211,23 +211,29 @@ class RaspberryPiSensor:
             'power': 1350.0 + random.uniform(-100, 150)    # High load
         }
     
-    def start_monitoring(self, interval=5.0, duration=60):
-        """Start continuous sensor monitoring"""
+    def start_monitoring(self, interval=1.0, duration=30):
+        """Start real-time monitoring with immediate Elastic updates"""
         print(f"🔄 Starting {duration}s monitoring (interval: {interval}s)")
+        print(f"📡 Each reading sent immediately to Elastic Serverless")
         
         # Create Elastic index
         self.create_elastic_mapping()
         
+        reading_count = 0
         end_time = time.time() + duration
-        anomaly_trigger = random.uniform(20, 40)  # Random anomaly time
+        anomaly_trigger = random.uniform(duration * 0.3, duration * 0.7)  # Random anomaly time
         
         while time.time() < end_time:
+            reading_count += 1
+            current_time = datetime.now().strftime("%H:%M:%S")
+            
             # Decide if this should be an anomaly reading
             elapsed = time.time() - (end_time - duration)
-            if elapsed > anomaly_trigger and elapsed < anomaly_trigger + 15:
+            if elapsed > anomaly_trigger and elapsed < anomaly_trigger + 10:
                 sensor_data = self.simulate_anomaly()
                 risk_zone = "red"  # High risk during anomaly
                 confidence = 0.85
+                status_emoji = "🔴"
             else:
                 sensor_data = self.read_sensors()
                 # Simple risk assessment based on thresholds
@@ -240,19 +246,29 @@ class RaspberryPiSensor:
                 if risk_score >= 3:
                     risk_zone = "red"
                     confidence = 0.75
+                    status_emoji = "🔴"
                 elif risk_score >= 2:
                     risk_zone = "yellow"
                     confidence = 0.60
+                    status_emoji = "🟡"
                 else:
                     risk_zone = "green"
                     confidence = 0.90
+                    status_emoji = "🟢"
             
-            # Send to Elastic
-            self.send_to_elastic(sensor_data, risk_zone, confidence)
+            # Send to Elastic immediately (1 reading = 1 send)
+            success = self.send_to_elastic(sensor_data, risk_zone, confidence)
+            
+            if success:
+                print(f"#{reading_count:3d} [{current_time}] {status_emoji} {risk_zone.upper():6s} | "
+                      f"T={sensor_data['temperature']:5.1f}°C V={sensor_data['vibration']:5.3f}g | ✅ Elastic")
+            else:
+                print(f"#{reading_count:3d} [{current_time}] ❌ FAILED to send to Elastic")
             
             time.sleep(interval)
         
-        print("✅ Monitoring session completed")
+        print(f"\n✅ Monitoring completed: {reading_count} readings sent individually")
+        print(f"🎯 Dashboard shows all {reading_count} real-time updates!")
 
 
 def main():
@@ -271,11 +287,28 @@ def main():
     print(f"Strain: {data['strain']}µε")
     print(f"Power: {data['power']}W")
     
-    # Start monitoring
+    # Start monitoring with faster updates for real-time dashboard
     print(f"\n🔄 Starting live monitoring...")
-    sensor.start_monitoring(interval=3.0, duration=30)
+    print("Choose monitoring mode:")
+    print("1. Fast demo (1-second intervals, 30 seconds)")
+    print("2. Standard monitoring (3-second intervals, 60 seconds)")
+    print("3. Extended monitoring (5-second intervals, 5 minutes)")
     
-    print(f"\nDemo complete! Check your Elastic Serverless dashboard for data")
+    choice = input("Enter choice (1-3, default=1): ").strip() or "1"
+    
+    if choice == "1":
+        print("🚀 Fast demo mode - updating dashboard every second!")
+        sensor.start_monitoring(interval=1.0, duration=30)
+    elif choice == "2":
+        print("📊 Standard monitoring mode")
+        sensor.start_monitoring(interval=3.0, duration=60)
+    else:
+        print("⏱️ Extended monitoring mode")
+        sensor.start_monitoring(interval=5.0, duration=300)
+    
+    print(f"\n🎉 Demo complete! Check your dashboards:")
+    print(f"📊 Elastic Serverless: https://my-elasticsearch-project-c80e6e.kb.us-west1.gcp.elastic.cloud")
+    print(f"🌐 Simple Dashboard: Open simple_dashboard.html in browser")
 
 
 if __name__ == "__main__":
