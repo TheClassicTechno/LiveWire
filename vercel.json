@@ -1,21 +1,29 @@
 {
   "version": 2,
   "name": "livewire",
-  "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/build",
-  "installCommand": "cd frontend && npm install",
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
   "routes": [
     {
       "src": "/static/(.*)",
+      "headers": {
+        "cache-control": "s-maxage=31536000"
+      },
       "dest": "/static/$1"
     },
     {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico"
-    },
-    {
-      "src": "/manifest.json", 
-      "dest": "/manifest.json"
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|ico|svg)$)",
+      "headers": {
+        "cache-control": "s-maxage=31536000"
+      },
+      "dest": "/$1"
     },
     {
       "src": "/(.*)",
