@@ -8,6 +8,11 @@ AI that monitors and predicts infrastructure disasters before they happen. **An 
 [![NetworkX](https://img.shields.io/badge/NetworkX-Graph%20Analysis-green?logo=networkx)](https://networkx.org/)
 [![Pandas](https://img.shields.io/badge/Pandas-Data%20Processing-purple?logo=pandas)](https://pandas.pydata.org/)
 [![Mapbox](https://img.shields.io/badge/Mapbox-Visualization-blue?logo=mapbox)](https://www.mapbox.com/)
+[![React](https://img.shields.io/badge/React-18.2.0-61dafb?logo=react&logoColor=white)](https://reactjs.org/)
+[![React Router](https://img.shields.io/badge/React_Router-6.3.0-ca4245?logo=react-router&logoColor=white)](https://reactrouter.com/)
+[![Mapbox GL](https://img.shields.io/badge/Mapbox_GL-3.16.0-007cbf?logo=mapbox&logoColor=white)](https://www.mapbox.com/)
+[![Framer Motion](https://img.shields.io/badge/Framer_Motion-7.2.1-0055FF?logo=framer&logoColor=white)](https://www.framer.com/motion/)
+[![Recharts](https://img.shields.io/badge/Recharts-2.5.0-22b5bf?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTEyIDJMMiA3djEwbDEwIDUgMTAtNVY3TDEyIDJ6Ii8+PC9zdmc+)](https://recharts.org/)
 
 ---
 
@@ -24,7 +29,7 @@ AI that monitors and predicts infrastructure disasters before they happen. **An 
 >
 > Imagine if grid operators had 308 days to act. No evacuations. No deaths. No destroyed communities.
 >
-> **Deploy IoT sensors. Run LiveWire. Give grid operators 308 days to act.**"
+> **Deploy IoT sensors. Run LiveWire. Give grid operators 308 days to act.**
 
 ---
 
