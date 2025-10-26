@@ -245,15 +245,6 @@ python scripts/test_enhanced_neural_network_cascade_models.py
 
 ---
 
-## 🏆 Team Contributions
-
-**Teammate**: Model development, testing framework, performance optimization
-**You**: Data integration pipeline, cascade simulation, validation architecture
-
-**Together**: A complete, production-ready system for preventing infrastructure disasters.
-
----
-
 ## ⚡ One-Liner
 
 **LiveWire is an agentic electrocardiogram for power grids—predicting catastrophic failures before they happen with AI.**
