@@ -1,0 +1,55 @@
+.sensor-popup {
+  padding: 12px;
+  min-width: 250px;
+  max-width: 300px;
+}
+
+.sensor-popup h3 {
+  margin: 0 0 12px 0;
+  color: #2d3748;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sensor-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.sensor-stats .stat {
+  padding: 8px;
+  background: #f7fafc;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sensor-stats .stat label {
+  font-size: 12px;
+  color: #4a5568;
+  margin-bottom: 4px;
+}
+
+.sensor-stats .stat span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+/* Pulsing effect for live data */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 255, 136, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
+  }
+}
+
+.sensor-stats .stat[data-live="true"] {
+  animation: pulse 2s infinite;
+}

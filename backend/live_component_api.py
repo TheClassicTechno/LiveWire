@@ -338,6 +338,88 @@ def init_live_component():
         return jsonify({"error": str(e), "status": "failed"}), 500
 
 
+def calculate_rul_change_and_stress(current_reading: dict, baseline_reading: dict, baseline_rul: dict, current_rul: dict) -> dict:
+    """
+    Calculate RUL change from baseline and identify stressed sensors.
+
+    Args:
+        current_reading: Current sensor readings
+        baseline_reading: Baseline (first/synthetic) sensor readings
+        baseline_rul: Baseline RUL prediction
+        current_rul: Current RUL prediction
+
+    Returns:
+        Dict with:
+        - rul_change_from_baseline: hours and percent
+        - stress_indicators: which sensors are elevated
+        - sensor_deltas: how much each sensor changed
+    """
+    try:
+        # Calculate RUL change
+        baseline_rul_hours = baseline_rul.get("rul_hours", 0) if baseline_rul else 0
+        current_rul_hours = current_rul.get("rul_hours", 0) if current_rul else 0
+
+        rul_change_hours = current_rul_hours - baseline_rul_hours
+        rul_change_percent = (rul_change_hours / baseline_rul_hours * 100) if baseline_rul_hours > 0 else 0
+
+        # Identify stress indicators (sensors above baseline)
+        stress_indicators = {}
+        sensor_deltas = {}
+
+        # Check key sensors
+        sensor_ranges = {
+            "sensor_1": (100, 150, "vibration"),  # min, max, label
+            "sensor_2": (350, 500, "temperature"),
+            "sensor_3": (450, 600, "frequency"),
+        }
+
+        for sensor_key, (min_val, max_val, label) in sensor_ranges.items():
+            if sensor_key in current_reading and sensor_key in baseline_reading:
+                baseline_val = baseline_reading.get(sensor_key, 0)
+                current_val = current_reading.get(sensor_key, 0)
+                delta = current_val - baseline_val
+                delta_percent = (delta / baseline_val * 100) if baseline_val > 0 else 0
+
+                # Midpoint is "normal"
+                midpoint = (min_val + max_val) / 2
+                elevated_threshold = midpoint + (max_val - midpoint) * 0.3  # 30% above midpoint = elevated
+
+                stress_indicators[label] = {
+                    "elevated": current_val > elevated_threshold,
+                    "critical": current_val > max_val * 0.9,
+                    "baseline_value": round(float(baseline_val), 2),
+                    "current_value": round(float(current_val), 2),
+                    "delta": round(float(delta), 2),
+                    "delta_percent": round(float(delta_percent), 2),
+                    "status": "critical" if current_val > max_val * 0.9 else "elevated" if current_val > elevated_threshold else "normal"
+                }
+
+                sensor_deltas[sensor_key] = {
+                    "delta": round(float(delta), 2),
+                    "delta_percent": round(float(delta_percent), 2),
+                    "baseline": round(float(baseline_val), 2),
+                    "current": round(float(current_val), 2)
+                }
+
+        return {
+            "rul_change_from_baseline": {
+                "hours": round(float(rul_change_hours), 2),
+                "percent": round(float(rul_change_percent), 2),
+                "direction": "decreasing" if rul_change_hours < 0 else "increasing" if rul_change_hours > 0 else "stable"
+            },
+            "stress_indicators": stress_indicators,
+            "sensor_deltas": sensor_deltas
+        }
+
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to calculate stress indicators: {e}")
+        return {
+            "rul_change_from_baseline": {"hours": 0, "percent": 0, "direction": "unknown"},
+            "stress_indicators": {},
+            "sensor_deltas": {}
+        }
+
+
 @bp.route('/api/live-component/status', methods=['GET'])
 def get_live_component_status():
     """
@@ -355,6 +437,9 @@ def get_live_component_status():
         "current_reading": { sensor_1, sensor_2, ... },
         "rul_prediction": { rul_hours, risk_zone, ... },
         "data_source": "elastic" or "synthetic",
+        "elastic_available": True/False,
+        "rul_change_from_baseline": { "hours": -0.5, "percent": -2.1, "direction": "decreasing" },
+        "stress_indicators": { "temperature": {...}, "vibration": {...} },
         "last_update": "2025-10-26T11:30:00Z"
     }
     """
@@ -365,14 +450,18 @@ def get_live_component_status():
         tracker = get_live_tracker()
         sim = get_degradation_sim()
 
+        # Get baseline reading and RUL (from synthetic data)
+        baseline_reading = sim.get_latest_reading()
+        baseline_rul = tracker.rul_prediction if tracker.rul_prediction else {}  # Initial RUL set at init
+
         # Try to fetch latest sensor data from Elasticsearch
         elastic_data = fetch_latest_sensor_data_from_elastic()
         data_source = "synthetic"
+        elastic_available = elastic_data is not None
 
         if elastic_data:
             # We have real hardware data from Elastic
             # Merge it with our baseline structure and recalculate RUL
-            baseline_reading = tracker.current_reading or sim.get_latest_reading()
             if baseline_reading:
                 # Build complete sensor reading from Elastic data + baseline structure
                 updated_reading = build_sensor_reading_from_elastic(elastic_data, baseline_reading)
@@ -391,9 +480,22 @@ def get_live_component_status():
                     logger.info(f"✅ RUL updated from Elastic: {new_rul['rul_hours']:.1f}h ({new_rul['risk_zone']})")
 
         state = tracker.get_state()
+
+        # Calculate RUL change and stress indicators
+        stress_analysis = calculate_rul_change_and_stress(
+            current_reading=tracker.current_reading or baseline_reading,
+            baseline_reading=baseline_reading,
+            baseline_rul=baseline_rul,
+            current_rul=tracker.rul_prediction
+        )
+
         return jsonify({
             **state,
             "data_source": data_source,
+            "elastic_available": elastic_available,
+            "rul_change_from_baseline": stress_analysis["rul_change_from_baseline"],
+            "stress_indicators": stress_analysis["stress_indicators"],
+            "sensor_deltas": stress_analysis["sensor_deltas"],
             "timestamp": datetime.utcnow().isoformat() + "Z"
         }), 200
 
