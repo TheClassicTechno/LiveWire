@@ -146,7 +146,7 @@ const ParadiseDemoMap = () => {
         temperature: 65 + (Math.random() * 30),
         vibration: 0.15 + (cci * 0.5),
         strain: 120 + (cci * 200),
-        wind_speed: 15 + (progress ? (308 - daysUntilFire) / 308 * 40 : 0),
+        wind_speed: 15 + (date >= criticalAlertDate ? (308 - daysUntilFire) / 308 * 40 : 0),
         daysUntilFire: daysUntilFire,
         criticalAlertDate: criticalAlertDate,
       }

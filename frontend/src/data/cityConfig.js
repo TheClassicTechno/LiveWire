@@ -1,40 +1,38 @@
 /**
  * City Configuration
- * Centralized configuration for all cities with map view settings
+ * Real California transmission grids from OpenStreetMap
  */
 
 export const CITY_CONFIG = {
   'los-angeles': {
-    name: 'Los Angeles Cable Network',
-    center: [-118.2500, 34.0500],
-    zoom: 17,
+    key: 'los-angeles',
+    name: 'Los Angeles Transmission Grid',
+    center: [-118.2437, 34.0522],
+    zoom: 16,
     pitch: 60,
     bearing: 0,
-    description: 'Downtown LA Financial District cables'
+    description: 'Real transmission lines - Southern California',
+    region: 'LOS_ANGELES'
   },
   'san-francisco': {
-    name: 'San Francisco Cable Network',
-    center: [-122.4000, 37.7900],
-    zoom: 17,
+    key: 'san-francisco',
+    name: 'San Francisco Transmission Grid',
+    center: [-122.4194, 37.7749],
+    zoom: 16,
     pitch: 60,
     bearing: 0,
-    description: 'SF Financial District cables'
+    description: 'Real transmission lines - Northern California',
+    region: 'SAN_FRANCISCO'
   },
   'paradise-city': {
-    name: 'Paradise Cable Network',
+    key: 'paradise-city',
+    name: 'Paradise Transmission Grid',
     center: [-121.5795, 39.7596],
     zoom: 14,
     pitch: 60,
     bearing: 0,
-    description: 'Actual Paradise, CA (2018 Camp Fire location)'
-  },
-  'new-york': {
-    name: 'New York City Cable Network',
-    center: [-74.0060, 40.7128],
-    zoom: 17,
-    pitch: 60,
-    bearing: 0,
-    description: 'NYC Financial District cables'
+    description: 'Real transmission lines - Camp Fire location (2018)',
+    region: 'PARADISE'
   }
 };
 
