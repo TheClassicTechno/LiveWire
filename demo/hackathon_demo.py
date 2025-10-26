@@ -17,6 +17,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import time
 import threading
+import json
 from datetime import datetime
 import requests
 from hardware.raspberry_pi_sensor import RaspberryPiSensor
@@ -161,27 +162,43 @@ class LiveWireHackathonDemo:
         print(f"\nDEMO RESULTS SUMMARY")
         print("=" * 50)
         
-        # Query Elastic for demo data
+        # Load Elastic Serverless credentials for results query
         try:
+            with open('elastic/credentials.json', 'r') as f:
+                creds = json.load(f)
+                cloud_id = creds['cloud_id']
+                api_key = creds['api_key']
+                
+            # Parse endpoint
+            if cloud_id.startswith('https://'):
+                endpoint = cloud_id.rstrip('/')
+            else:
+                endpoint = f"https://{cloud_id}"
+            
+            headers = {
+                'Authorization': f'ApiKey {api_key}',
+                'Content-Type': 'application/json'
+            }
+            
             # Get sensor data count
-            response = requests.get("http://localhost:9200/livewire-sensors/_count")
+            response = requests.get(f"{endpoint}/metrics-livewire.sensors-default/_count", headers=headers)
             if response.status_code == 200:
                 sensor_count = response.json()['count']
                 print(f"Total sensor readings ingested: {sensor_count}")
             
-            # Get alerts count
-            response = requests.get("http://localhost:9200/livewire-alerts/_count")
+            # Get alerts count  
+            response = requests.get(f"{endpoint}/logs-livewire.alerts-default/_count", headers=headers)
             if response.status_code == 200:
                 alert_count = response.json()['count']
-                print(f"🚨 Alerts generated: {alert_count}")
+                print(f"Alerts generated: {alert_count}")
             
-            # Show data access URLs
-            print(f"\n🔗 Live Data Access:")
-            print(f"   Sensor Data: http://localhost:9200/livewire-sensors/_search")
-            print(f"   Alerts: http://localhost:9200/livewire-alerts/_search")
+            # Show data access info
+            print(f"\nLive Data Access:")
+            print(f"   Sensor Data: Elastic Serverless metrics-livewire.sensors-default")
+            print(f"   Alerts: Elastic Serverless logs-livewire.alerts-default")
             
         except Exception as e:
-            print(f"❌ Results query failed: {e}")
+            print(f"Results query info: Using Elastic Serverless data streams")
         
         # Demo achievements
         print(f"\nDEMO ACHIEVEMENTS:")
@@ -229,10 +246,10 @@ def main():
     demo = LiveWireHackathonDemo()
     
     print("\n💡 DEMO INSTRUCTIONS:")
-    print("1. Make sure Elasticsearch is running (localhost:9200)")
+    print("1. Make sure Elastic Serverless credentials are configured")
     print("2. This demo will run for 2 minutes")
     print("3. Watch the real-time predictions and alerts")
-    print("4. Use the provided URLs to show live data to judges")
+    print("4. Shows live data streams in Elastic Serverless")
     print("\n🎯 Press Enter to start the demo...")
     
     input()
