@@ -113,8 +113,8 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
         });
       }
 
-      // Fetch historical data
-      const historyRes = await fetch('/api/live-component/history?days=35&interval=1');
+      // Fetch historical baseline data (35 days of simulated data)
+      const historyRes = await fetch('/api/live-component/history?days=35&interval=2');
       if (!historyRes.ok) throw new Error('Failed to fetch history');
 
       let historyData;
@@ -125,7 +125,19 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
         historyData = { readings: [] };
       }
 
-      // Format history data for Recharts
+      // Populate LIVE graph with baseline data on first load
+      if (historyData.readings && Array.isArray(historyData.readings) && rulTrendData.length === 0) {
+        const baselineGraphData = historyData.readings.map((reading, index) => ({
+          timestamp: `Day ${index}`,
+          rul: reading.rul_true || 0,
+          riskZone: 'green', // Baseline data is stable
+          dataSource: 'baseline',
+        }));
+        setRulTrendData(baselineGraphData);
+        console.log(`📊 Loaded ${baselineGraphData.length} baseline data points to live graph`);
+      }
+
+      // Format history data for other uses
       if (historyData.readings && Array.isArray(historyData.readings)) {
         const formattedData = historyData.readings.map((reading) => ({
           timestamp: new Date(reading.timestamp).toLocaleDateString(),
@@ -216,8 +228,9 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
 
       setSpeedupSummary(data.summary);
 
-      // Initialize speedup trend data with empty array
-      setSpeedupTrendData([]);
+      // Initialize speedup trend data with baseline data
+      // Copy the live graph's baseline data to speedup graph
+      setSpeedupTrendData(rulTrendData.map(point => ({...point})));
 
       // Animate through trajectory: each day shown for 100ms
       for (let i = 0; i < trajectory.length; i++) {
