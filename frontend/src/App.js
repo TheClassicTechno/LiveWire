@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CityProvider } from './contexts/CityContext';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
+import ParadiseDemoMap from './components/ParadiseDemoMap';
 import './App.css';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/camp-fire-demo" element={<ParadiseDemoMap />} />
           </Routes>
         </div>
       </Router>

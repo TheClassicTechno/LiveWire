@@ -308,6 +308,8 @@ npm start
 
 ## 📁 Project Structure
 
+elastic search dashboard data results: https://my-elasticsearch-project-c80e6e.kb.us-west1.gcp.elastic.cloud/app/lens#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))
+
 ```
 LiveWire/
 ├── 📊 Backend AI Models (Python)

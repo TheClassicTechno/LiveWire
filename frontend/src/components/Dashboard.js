@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Zap, 
-  Activity, 
-  BarChart3, 
-  DollarSign, 
-  Menu, 
+import {
+  Zap,
+  Activity,
+  BarChart3,
+  DollarSign,
+  Menu,
   X,
-  TrendingUp,
   AlertTriangle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +14,7 @@ import { useCity } from '../contexts/CityContext';
 import HealthVisualization from './HealthVisualization';
 import Analytics from './Analytics';
 import EconomicAssessment from './EconomicAssessment';
+import ParadiseDemoMap from './ParadiseDemoMap';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -31,6 +31,7 @@ const Dashboard = () => {
     { id: 'health', label: 'Health Visualization', icon: Activity },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'economic', label: 'Economic Assessment', icon: DollarSign },
+    { id: 'camp-fire', label: 'Camp Fire Analysis', icon: AlertTriangle },
   ];
 
   const renderContent = () => {
@@ -41,6 +42,8 @@ const Dashboard = () => {
         return <Analytics />;
       case 'economic':
         return <EconomicAssessment />;
+      case 'camp-fire':
+        return <ParadiseDemoMap />;
       default:
         return <HealthVisualization />;
     }
