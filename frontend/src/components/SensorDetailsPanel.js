@@ -128,8 +128,8 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
       // Populate LIVE graph with baseline data on first load
       if (historyData.readings && Array.isArray(historyData.readings) && rulTrendData.length === 0) {
         const baselineGraphData = historyData.readings.map((reading, index) => ({
-          timestamp: `Day ${index}`,
-          rul: reading.rul_true || 0,
+          timestamp: `${index * 4}h`, // Roughly 4 hours per reading (interval=2 from 35 days)
+          rul: (reading.rul_true || 0) / 24, // Convert cycles to hours for consistent display
           riskZone: 'green', // Baseline data is stable
           dataSource: 'baseline',
         }));
