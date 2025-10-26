@@ -1,0 +1,15 @@
+/* Sensor Point Layer Styling */
+/* This file is primarily for reference - actual styling is done via Mapbox layer paint properties */
+
+/* When sensor status changes, update these classes */
+.sensor-healthy {
+  /* circle-color: #00ff88 (green) */
+}
+
+.sensor-warning {
+  /* circle-color: #ffaa00 (yellow) */
+}
+
+.sensor-critical {
+  /* circle-color: #ff3333 (red) */
+}

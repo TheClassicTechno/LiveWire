@@ -13,8 +13,37 @@ from datetime import datetime, timedelta
 from flask import Flask, render_template, jsonify
 import threading
 import time
+import os
+import sys
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
+
+# Register blueprints
+from backend.elasticsearch_proxy import bp as elasticsearch_bp
+from backend.rul_api import bp as rul_bp
+from backend.rul_elasticsearch_integration import bp as rul_elasticsearch_bp
+from backend.live_component_api import bp as live_component_bp
+
+app.register_blueprint(elasticsearch_bp)
+app.register_blueprint(rul_bp)
+app.register_blueprint(rul_elasticsearch_bp)
+app.register_blueprint(live_component_bp)
+
+# Initialize RUL model
+from backend.rul_api import load_rul_artifacts
+load_rul_artifacts()
+
+# Initialize RUL Elasticsearch manager
+from backend.rul_elasticsearch_integration import rul_manager
+try:
+    rul_manager.connect()
+    print("✅ RUL Elasticsearch integration ready")
+except Exception as e:
+    print(f"⚠️ RUL Elasticsearch connection failed: {e}")
 
 class LiveWireDataFetcher:
     """Fetches data from Elastic Serverless for dashboard"""
@@ -288,7 +317,24 @@ def api_data():
     return jsonify(data_fetcher.get_latest_data())
 
 if __name__ == '__main__':
+    # Get port from command line or environment or default
+    port = 5000
+
+    if len(sys.argv) > 1:
+        try:
+            port = int(sys.argv[1])
+        except ValueError:
+            print(f"❌ Invalid port: {sys.argv[1]}")
+            sys.exit(1)
+    elif 'PORT' in os.environ:
+        try:
+            port = int(os.environ['PORT'])
+        except ValueError:
+            print(f"❌ Invalid PORT env var: {os.environ['PORT']}")
+            sys.exit(1)
+
     print("🌐 Starting LiveWire Web Dashboard")
-    print("📊 Dashboard will be available at: http://localhost:5000")
+    print(f"📊 Dashboard will be available at: http://localhost:{port}")
     print("🔄 Auto-refreshes every 10 seconds")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    print(f"⚡ Backend API: http://localhost:{port}/api/*")
+    app.run(debug=True, host='0.0.0.0', port=port, use_reloader=False)
