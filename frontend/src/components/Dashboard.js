@@ -11,15 +11,14 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCity } from '../contexts/CityContext';
-import HealthVisualization from './HealthVisualization';
 import Analytics from './Analytics';
 import EconomicAssessment from './EconomicAssessment';
-import ParadiseDemoMap from './ParadiseDemoMap';
+import LosAngelesMap from './LosAngelesMap';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { getCurrentCityStats } = useCity();
+  const { getCurrentCityStats, setCurrentCity } = useCity();
   const [activeTab, setActiveTab] = useState('health');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -27,26 +26,40 @@ const Dashboard = () => {
     navigate('/');
   };
 
+  // Map tab IDs to city configuration keys
+  const cityMap = {
+    'paradise': 'paradise-city',
+    'la': 'los-angeles',
+    'sf': 'san-francisco'
+  };
+
   const tabs = [
-    { id: 'health', label: 'Health Visualization', icon: Activity },
+    { id: 'paradise', label: 'Paradise (Camp Fire)', icon: AlertTriangle },
+    { id: 'la', label: 'Los Angeles', icon: Activity },
+    { id: 'sf', label: 'San Francisco', icon: Activity },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'economic', label: 'Economic Assessment', icon: DollarSign },
-    { id: 'camp-fire', label: 'Camp Fire Analysis', icon: AlertTriangle },
   ];
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'health':
-        return <HealthVisualization />;
-      case 'analytics':
-        return <Analytics />;
-      case 'economic':
-        return <EconomicAssessment />;
-      case 'camp-fire':
-        return <ParadiseDemoMap />;
-      default:
-        return <HealthVisualization />;
+  // Update city context when tab changes
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    if (cityMap[tabId]) {
+      setCurrentCity(cityMap[tabId]);
     }
+  };
+
+  const renderContent = () => {
+    // Always render the map as the base content, but it's persistent across tabs
+    if (activeTab === 'analytics') {
+      return <Analytics />;
+    }
+    if (activeTab === 'economic') {
+      return <EconomicAssessment />;
+    }
+    // For all city tabs (paradise, la, sf), render the same persistent map
+    // The map updates internally based on currentCity from CityContext
+    return <LosAngelesMap />;
   };
 
   return (
@@ -78,7 +91,7 @@ const Dashboard = () => {
               <motion.button
                 key={tab.id}
                 className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -127,8 +140,10 @@ const Dashboard = () => {
               {tabs.find(tab => tab.id === activeTab)?.label}
             </h1>
             <p className="page-subtitle">
-              {activeTab === 'health' && 'Real-time monitoring of cable health across the city'}
-              {activeTab === 'analytics' && 'Detailed analysis of cable parameters and health trends'}
+              {activeTab === 'paradise' && 'Real transmission grid - 2018 Camp Fire case study with Tower 27/222'}
+              {activeTab === 'la' && 'Real transmission grid visualization for Los Angeles area'}
+              {activeTab === 'sf' && 'Real transmission grid visualization for San Francisco area'}
+              {activeTab === 'analytics' && 'Detailed analysis of transmission line parameters and risk trends'}
               {activeTab === 'economic' && 'Cost analysis and economic impact assessment'}
             </p>
           </div>
