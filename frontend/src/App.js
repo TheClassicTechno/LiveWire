@@ -5,10 +5,6 @@ import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 import ParadiseDemoMap from './components/ParadiseDemoMap';
 import LiveElasticsearchDashboard from './components/LiveElasticsearchDashboard';
-<<<<<<< HEAD
-=======
-import LiveComponentDashboard from './components/LiveComponentDashboard';
->>>>>>> 05e9e369937a6de6abceedcebd5f1a45da0cd095
 import './App.css';
 
 function App() {
