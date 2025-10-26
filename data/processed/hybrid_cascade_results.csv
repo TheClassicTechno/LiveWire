@@ -1,0 +1,5 @@
+model,dataset,accuracy,f1_score,damage_precision,damage_recall,damage_f1,training_time,prediction_time
+Enhanced Neural Network (Baseline),cascade_failures_hybrid,0.6,0.6,0.4,0.4,0.4,0.102587,0.000212
+Hybrid Model (Voting),cascade_failures_hybrid,0.6,0.5403726708074533,0.25,0.1,0.14285714285714285,0.863191,0.020444
+Hybrid Model (Weighted),cascade_failures_hybrid,0.6,0.5403726708074533,0.25,0.1,0.14285714285714285,2.258897,0.039119
+Advanced Hybrid Model,cascade_failures_hybrid,0.6,0.5403726708074533,0.25,0.1,0.14285714285714285,4.184062,0.033943

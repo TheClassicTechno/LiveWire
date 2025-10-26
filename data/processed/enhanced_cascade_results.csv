@@ -1,0 +1,4 @@
+model,dataset,accuracy,f1_score,damage_precision,damage_recall,damage_f1,training_time,prediction_time
+Enhanced Random Forest,cascade_failures_enhanced,0.5333333333333333,0.463768115942029,0.0,0.0,0.0,0.136681,0.003797
+Enhanced Gradient Boosting,cascade_failures_enhanced,0.5666666666666667,0.5185185185185186,0.2,0.1,0.13333333333333333,0.160618,0.000562
+Enhanced Neural Network,cascade_failures_enhanced,0.7,0.6957637997432606,0.5555555555555556,0.5,0.5263157894736842,0.091889,0.000306

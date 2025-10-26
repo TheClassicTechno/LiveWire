@@ -1,0 +1,9 @@
+approach,accuracy,category
+Power Grid (Grid Risk),44.5,Electrical Faults
+Power Grid (CCI),51.7,Electrical Faults
+Simple Power Grid,50.0,Electrical Faults
+Basic Cascade (Grid Risk),56.7,Network Topology
+Basic Cascade (CCI),56.7,Network Topology
+Enhanced Random Forest,53.3,Advanced Features
+Enhanced Gradient Boosting,56.7,Advanced Features
+Enhanced Neural Network,70.0,Advanced Features

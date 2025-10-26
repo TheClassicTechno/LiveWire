@@ -1,0 +1,3 @@
+dataset,model,accuracy,f1_score,training_time,prediction_time
+power_grid_simple,Simple Grid Risk Model,0.41333333333333333,0.5849056603773585,0.178477,0.171824
+power_grid_simple,Simple CCI Model,0.5,0.49764139232335275,0.149354,0.004469
