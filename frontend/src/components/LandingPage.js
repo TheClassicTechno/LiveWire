@@ -434,26 +434,11 @@ const LandingPage = () => {
             </div>
 
             <nav className="main-nav">
-              <a href="#products" className="nav-link">
-                Products
-              </a>
-              <a href="#solutions" className="nav-link">
-                Solutions
-              </a>
               <a href="#developers" className="nav-link">
-                Developers
-              </a>
-              <a href="#company" className="nav-link">
-                Company
-              </a>
-              <a href="#resources" className="nav-link">
-                Resources
-              </a>
-              <a href="#pricing" className="nav-link">
-                Pricing
+                About Us
               </a>
               <a href="#contact" className="nav-link">
-                Contact us
+                Contact
               </a>
             </nav>
 
@@ -482,68 +467,19 @@ const LandingPage = () => {
         >
           <nav className="mobile-nav">
             <a
-              href="#products"
-              className="mobile-nav-link"
-              onClick={toggleMobileMenu}
-            >
-              Products
-            </a>
-            <a
-              href="#solutions"
-              className="mobile-nav-link"
-              onClick={toggleMobileMenu}
-            >
-              Solutions
-            </a>
-            <a
-              href="#developers"
-              className="mobile-nav-link"
-              onClick={toggleMobileMenu}
-            >
-              Developers
-            </a>
-            <a
               href="#company"
               className="mobile-nav-link"
               onClick={toggleMobileMenu}
             >
-              Company
+              About Us
             </a>
             <a
               href="#resources"
               className="mobile-nav-link"
               onClick={toggleMobileMenu}
             >
-              Resources
+              Contact
             </a>
-            <a
-              href="#pricing"
-              className="mobile-nav-link"
-              onClick={toggleMobileMenu}
-            >
-              Pricing
-            </a>
-            <a
-              href="#contact"
-              className="mobile-nav-link"
-              onClick={toggleMobileMenu}
-            >
-              Contact us
-            </a>
-            <div className="mobile-nav-actions">
-              <button
-                className="mobile-nav-btn login-btn"
-                onClick={toggleMobileMenu}
-              >
-                Log in
-              </button>
-              <button
-                className="mobile-nav-btn signup-btn btn-electric"
-                onClick={toggleMobileMenu}
-              >
-                Sign up
-              </button>
-            </div>
           </nav>
         </motion.div>
 
@@ -652,16 +588,16 @@ const LandingPage = () => {
               </div>
               <div className="map-stats">
                 <div className="stat-item">
-                  <span className="stat-number">50+</span>
-                  <span className="stat-label">Countries</span>
-                </div>
-                <div className="stat-item">
                   <span className="stat-number">1M+</span>
                   <span className="stat-label">Cables Monitored</span>
                 </div>
                 <div className="stat-item">
                   <span className="stat-number">24/7</span>
-                  <span className="stat-label">Global Coverage</span>
+                  <span className="stat-label">Live Coverage</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-number">300+</span>
+                  <span className="stat-label">Days to Prepare</span>
                 </div>
               </div>
             </div>
