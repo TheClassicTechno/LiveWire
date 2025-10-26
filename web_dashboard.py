@@ -25,10 +25,12 @@ app = Flask(__name__)
 from backend.elasticsearch_proxy import bp as elasticsearch_bp
 from backend.rul_api import bp as rul_bp
 from backend.rul_elasticsearch_integration import bp as rul_elasticsearch_bp
+from backend.live_component_api import bp as live_component_bp
 
 app.register_blueprint(elasticsearch_bp)
 app.register_blueprint(rul_bp)
 app.register_blueprint(rul_elasticsearch_bp)
+app.register_blueprint(live_component_bp)
 
 # Initialize RUL model
 from backend.rul_api import load_rul_artifacts

@@ -5,6 +5,7 @@ import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 import ParadiseDemoMap from './components/ParadiseDemoMap';
 import LiveElasticsearchDashboard from './components/LiveElasticsearchDashboard';
+import LiveComponentDashboard from './components/LiveComponentDashboard';
 import './App.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/camp-fire-demo" element={<ParadiseDemoMap />} />
             <Route path="/elasticsearch" element={<LiveElasticsearchDashboard />} />
+            <Route path="/live-component" element={<LiveComponentDashboard />} />
           </Routes>
         </div>
       </Router>
