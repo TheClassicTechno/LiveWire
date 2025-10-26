@@ -231,12 +231,15 @@ def recalculate_rul(sensor_readings: dict, historical_readings: list = None) -> 
             previous_readings = historical_readings[-20:] if len(historical_readings) > 20 else historical_readings
 
         # Engineer features from sensor readings
+        logger.debug(f"🔧 Engineering features from {len(sensor_readings)} sensor readings...")
         X = rul_api.engineer_features(sensor_readings, previous_readings)
 
         # Scale features
+        logger.debug(f"📊 Scaling {len(X)} features using trained scaler...")
         X_scaled = rul_api.rul_scaler.transform(X.reshape(1, -1))
 
-        # Make prediction
+        # Make prediction using the trained Gradient Boosting model (NASA C-MAPSS trained)
+        logger.info(f"🤖 Calling RUL Gradient Boosting model (100 estimators, NASA C-MAPSS trained) with {len(X)} engineered features...")
         rul_cycles = float(rul_api.rul_model.predict(X_scaled)[0])
         rul_cycles = max(0, rul_cycles)  # Ensure non-negative
 
@@ -244,7 +247,8 @@ def recalculate_rul(sensor_readings: dict, historical_readings: list = None) -> 
         rul_hours = rul_cycles
         rul_days = rul_cycles / 24.0
 
-        # Calculate confidence (ensemble uncertainty)
+        # Calculate confidence (ensemble uncertainty from RF estimators)
+        logger.debug(f"📈 Calculating model confidence from {len(rul_api.rul_model.estimators_)} RF trees...")
         predictions_all = np.array([tree.predict(X_scaled) for tree in rul_api.rul_model.estimators_[:, 0]])
         confidence = float(np.std(predictions_all))
 
@@ -260,6 +264,8 @@ def recalculate_rul(sensor_readings: dict, historical_readings: list = None) -> 
             risk_score = max(0, 0.4 - (rul_hours - 72) / 360 * 0.4)
 
         risk_score = min(1.0, max(0.0, risk_score))
+
+        logger.info(f"✅ Model prediction: {rul_hours:.1f}h RUL ({risk_zone.upper()}) - Confidence: {confidence:.3f}")
 
         return {
             "rul_cycles": round(rul_cycles, 2),
@@ -792,4 +798,185 @@ def get_component_summary():
 
     except Exception as e:
         logger.error(f"❌ Failed to get summary: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+def generate_accelerated_degradation(current_reading: dict, days: int = 30, acceleration_factor: float = 100) -> list:
+    """
+    Generate synthetic degradation trajectory based on current knob values.
+
+    Higher sensor values (temp, vibration, strain) = faster degradation.
+    Returns list of {day, reading, rul_prediction} tuples for timeline visualization.
+
+    The key insight: We append projected days to the 35-day baseline history,
+    so the RUL model sees accumulated time-series data (35 + N days).
+    This is why RUL changes dramatically - the model is analyzing months of degradation.
+
+    Args:
+        current_reading: Current sensor values (from knobs)
+        days: Number of simulated days to project (default 30)
+        acceleration_factor: For display purposes (not used in calculation)
+
+    Returns:
+        List of degradation points: [{"day": 1, "rul": {...}, "reading": {...}}, ...]
+    """
+    try:
+        import numpy as np
+
+        trajectory = []
+        base_reading = current_reading.copy() if current_reading else {}
+
+        # Extract current sensor values to determine degradation rate
+        temp = base_reading.get('sensor_2', 425)  # Mid-range: 350-500
+        vibration = base_reading.get('sensor_1', 125)  # Mid-range: 100-150
+        strain = base_reading.get('sensor_3', 450)  # Mid-range: 50-500
+
+        # Normalize degradation factors (0 to 1)
+        temp_factor = (temp - 350) / (500 - 350) if 500 > 350 else 0.5  # Higher temp = faster degradation
+        vib_factor = (vibration - 100) / (150 - 100) if 150 > 100 else 0.5
+        strain_factor = (strain - 50) / (500 - 50) if 500 > 50 else 0.5
+
+        # Combined degradation rate (higher knob values = faster failure)
+        avg_degradation_factor = (temp_factor + vib_factor + strain_factor) / 3
+        degradation_rate = 0.3 + avg_degradation_factor * 2.0  # 0.3 to 2.3 cycles per day
+
+        logger.info(f"⏩ Accelerating {days} days with degradation rate {degradation_rate:.2f} cycles/day")
+
+        # Get current time_cycles from tracker or use 0
+        tracker = get_live_tracker()
+        current_time_cycles = tracker.current_reading.get('time_cycles', 0) if tracker and tracker.current_reading else 0
+        max_cycles = 361  # Default max
+
+        # Get baseline historical data (35 days)
+        sim = get_degradation_sim()
+        df = sim.get_historical_df() if sim else None
+        baseline_historical = df.to_dict('records') if df is not None else []
+
+        for day in range(1, days + 1):
+            # Age the component
+            aged_cycles = current_time_cycles + (day * degradation_rate)
+            aged_cycles = min(aged_cycles, max_cycles)  # Cap at max
+
+            # Create aged reading (sensors degrade with time)
+            aged_reading = base_reading.copy()
+            aged_reading['time_cycles'] = int(aged_cycles)
+
+            # Sensors drift higher over time (degradation)
+            age_factor = day / days  # 0 to 1 over 30 days
+            aged_reading['sensor_1'] = min(aged_reading.get('sensor_1', 125) + age_factor * 10, 150)  # Vibration increases
+            aged_reading['sensor_2'] = min(aged_reading.get('sensor_2', 425) + age_factor * 30, 500)  # Temp drifts
+            aged_reading['sensor_3'] = min(aged_reading.get('sensor_3', 450) + age_factor * 20, 600)  # Strain increases
+
+            # Build accumulated historical data: baseline (35 days) + projected days (1 to N)
+            # This gives the model a full 35+N day time series to analyze
+            accumulated_history = baseline_historical.copy()
+            for projected_day in range(1, day + 1):
+                proj_cycles = current_time_cycles + (projected_day * degradation_rate)
+                proj_reading = base_reading.copy()
+                proj_reading['time_cycles'] = int(proj_cycles)
+                proj_age_factor = projected_day / days
+                proj_reading['sensor_1'] = min(proj_reading.get('sensor_1', 125) + proj_age_factor * 10, 150)
+                proj_reading['sensor_2'] = min(proj_reading.get('sensor_2', 425) + proj_age_factor * 30, 500)
+                proj_reading['sensor_3'] = min(proj_reading.get('sensor_3', 450) + proj_age_factor * 20, 600)
+                accumulated_history.append(proj_reading)
+
+            # Predict RUL for aged reading with full accumulated history
+            # The model now sees 35 days + projected days, so it captures degradation trends
+            rul_prediction = recalculate_rul(aged_reading, accumulated_history)
+
+            if rul_prediction:
+                trajectory.append({
+                    "day": day,
+                    "time_cycles": int(aged_cycles),
+                    "reading": aged_reading,
+                    "rul_prediction": rul_prediction,
+                    "risk_zone": rul_prediction.get("risk_zone", "unknown"),
+                    "rul_hours": rul_prediction.get("rul_hours", 0)
+                })
+
+        logger.info(f"✅ Generated {len(trajectory)} day-by-day predictions with accumulated history")
+        return trajectory
+
+    except Exception as e:
+        logger.error(f"❌ Failed to generate accelerated degradation: {e}")
+        return []
+
+
+@bp.route('/api/live-component/accelerate', methods=['POST'])
+def accelerate_degradation():
+    """
+    Generate and return 30-day degradation trajectory for timeline visualization.
+
+    Request JSON:
+    {
+        "days": 30,
+        "acceleration_factor": 100
+    }
+
+    Returns:
+    {
+        "status": "success",
+        "trajectory": [
+            {
+                "day": 1,
+                "time_cycles": 1,
+                "rul_prediction": {"rul_hours": 349, "risk_zone": "green", ...},
+                "reading": {...}
+            },
+            ...
+        ],
+        "summary": {
+            "start_rul": 349,
+            "end_rul": 1,
+            "start_zone": "green",
+            "end_zone": "red"
+        }
+    }
+    """
+    try:
+        if not is_initialized():
+            return jsonify({"error": "Component not initialized", "status": "uninitialized"}), 400
+
+        data = request.get_json() or {}
+        days = data.get("days", 30)
+        acceleration_factor = data.get("acceleration_factor", 100)
+
+        # Get current reading from tracker
+        tracker = get_live_tracker()
+        if not tracker or not tracker.current_reading:
+            return jsonify({"error": "No current reading available"}), 400
+
+        # Generate trajectory
+        trajectory = generate_accelerated_degradation(
+            tracker.current_reading,
+            days=days,
+            acceleration_factor=acceleration_factor
+        )
+
+        if not trajectory:
+            return jsonify({"error": "Failed to generate trajectory"}), 500
+
+        # Calculate summary
+        summary = {
+            "start_rul": trajectory[0]["rul_hours"],
+            "end_rul": trajectory[-1]["rul_hours"],
+            "start_zone": trajectory[0]["risk_zone"],
+            "end_zone": trajectory[-1]["risk_zone"],
+            "days_to_critical": next(
+                (i["day"] for i in trajectory if i["risk_zone"] == "red"),
+                days  # If never reaches red, return days
+            )
+        }
+
+        logger.info(f"✅ Acceleration complete: {summary['start_rul']:.0f}h → {summary['end_rul']:.0f}h in {days} days")
+
+        return jsonify({
+            "status": "success",
+            "trajectory": trajectory,
+            "summary": summary,
+            "timestamp": datetime.utcnow().isoformat() + "Z"
+        }), 200
+
+    except Exception as e:
+        logger.error(f"❌ Acceleration failed: {e}")
         return jsonify({"error": str(e)}), 500

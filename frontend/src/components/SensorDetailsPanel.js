@@ -39,6 +39,12 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
   const [dataSource, setDataSource] = useState('synthetic');
   const [elasticAvailable, setElasticAvailable] = useState(false);
 
+  // Speedup/acceleration mode
+  const [speedupActive, setSpeedupActive] = useState(false);
+  const [speedupProgress, setSpeedupProgress] = useState(0);
+  const [speedupDays, setSpeedupDays] = useState(0);
+  const [speedupSummary, setSpeedupSummary] = useState(null);
+
   // Fetch sensor data from Phase 3 live component API
   const fetchSensorData = async () => {
     try {
@@ -174,6 +180,71 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
       if (interval) clearInterval(interval);
     };
   }, [isOpen, elasticAvailable]);
+
+  // Handle speedup/acceleration timeline
+  const handleSpeedup = async () => {
+    if (speedupActive) return; // Already running
+
+    setSpeedupActive(true);
+    setSpeedupProgress(0);
+    setSpeedupDays(0);
+
+    try {
+      // Call backend to generate 30-day degradation trajectory
+      const response = await fetch('/api/live-component/accelerate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          days: 30,
+          acceleration_factor: 100
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const trajectory = data.trajectory || [];
+
+      if (trajectory.length === 0) {
+        setError('Failed to generate degradation trajectory');
+        setSpeedupActive(false);
+        return;
+      }
+
+      setSpeedupSummary(data.summary);
+
+      // Animate through trajectory: each day shown for 100ms
+      for (let i = 0; i < trajectory.length; i++) {
+        const point = trajectory[i];
+
+        // Update sensor status with current trajectory point
+        setSensorStatus({
+          ...sensorStatus,
+          current_reading: point.reading,
+          rul_prediction: point.rul_prediction,
+          data_source: 'synthetic',
+          acceleration: true,
+          acceleration_day: point.day,
+          acceleration_total: trajectory.length
+        });
+
+        setSpeedupProgress(((i + 1) / trajectory.length) * 100);
+        setSpeedupDays(point.day);
+
+        // Wait 100ms before next frame (30 days in ~3 seconds)
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      // Animation complete
+      setSpeedupActive(false);
+    } catch (err) {
+      console.error('Speedup error:', err);
+      setError(err.message);
+      setSpeedupActive(false);
+    }
+  };
 
   const getRiskColor = (zone) => {
     const zones = {
@@ -619,6 +690,84 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
                       </div>
                     </motion.div>
                   )}
+
+                  {/* Speedup Timeline */}
+                  <motion.div
+                    className="panel-section speedup-section"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <button
+                      className={`speedup-button ${speedupActive ? 'active' : ''}`}
+                      onClick={handleSpeedup}
+                      disabled={speedupActive || loading}
+                    >
+                      {speedupActive ? (
+                        <>
+                          <span className="pulse-dot"></span>
+                          Simulating {speedupDays} / 30 Days...
+                        </>
+                      ) : (
+                        <>
+                          <span className="speedup-emoji">⏩</span>
+                          Show 30-Day Timeline
+                        </>
+                      )}
+                    </button>
+
+                    {speedupActive && (
+                      <motion.div
+                        className="speedup-timeline"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                      >
+                        <div className="timeline-progress-container">
+                          <div className="progress-bar">
+                            <motion.div
+                              className="progress-fill"
+                              style={{ width: `${speedupProgress}%` }}
+                              transition={{ type: 'tween', duration: 0.1 }}
+                            />
+                          </div>
+                          <div className="timeline-label">
+                            Day <span className="day-number">{speedupDays}</span> of 30
+                          </div>
+                        </div>
+
+                        {speedupSummary && (
+                          <div className="speedup-summary">
+                            <div className="summary-item">
+                              <span className="summary-label">Start RUL:</span>
+                              <span className="summary-value">{speedupSummary.start_rul?.toFixed(0)}h</span>
+                              <span className={`summary-zone ${speedupSummary.start_zone}`}>
+                                {speedupSummary.start_zone?.toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="summary-arrow">→</div>
+                            <div className="summary-item">
+                              <span className="summary-label">End RUL:</span>
+                              <span className="summary-value">{speedupSummary.end_rul?.toFixed(0)}h</span>
+                              <span className={`summary-zone ${speedupSummary.end_zone}`}>
+                                {speedupSummary.end_zone?.toUpperCase()}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {speedupSummary && speedupSummary.days_to_critical && (
+                          <div className="critical-day-alert">
+                            🔴 <strong>Critical at Day {speedupSummary.days_to_critical}</strong>
+                            {speedupSummary.days_to_critical < 10
+                              ? ' - Very fast degradation!'
+                              : speedupSummary.days_to_critical < 20
+                              ? ' - Moderate degradation'
+                              : ' - Slow degradation'}
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </motion.div>
 
                   {/* Info Footer */}
                   <div className="panel-footer">
