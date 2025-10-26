@@ -1,0 +1,85 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Model artifacts and data (ignore all except final results)
+*.joblib
+*.pkl
+*.pickle
+artifacts/
+
+# Data files (large datasets) - keep only structure
+data/raw/*.csv
+data/calib/*.csv
+data/pre_fire/*.csv
+data/camp_fire/*.csv
+
+# Keep only best results
+data/processed/*.csv
+!data/processed/camp_fire_predictions.csv
+
+# Keep directory structure
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/calib/.gitkeep
+!data/pre_fire/.gitkeep
+!data/camp_fire/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Kaggle API credentials
+kaggle.json
