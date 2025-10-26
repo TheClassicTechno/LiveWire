@@ -6,6 +6,9 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './LosAngelesMap.css';
 
+// Modular utilities
+import { CITY_CONFIG, getNextCity } from '../data/cityConfig';
+
 // Set your Mapbox access token
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
 
@@ -58,69 +61,26 @@ const LosAngelesMap = () => {
     }, 1000); // 1 second delay to simulate API call
   };
 
-  // City switching function
+  // City switching function - Uses modular CITY_CONFIG
   const switchCity = () => {
-    let newCity;
-    if (currentCity === 'los-angeles') {
-      newCity = 'san-francisco';
-    } else if (currentCity === 'san-francisco') {
-      newCity = 'paradise-city';
-    } else if (currentCity === 'paradise-city') {
-      newCity = 'new-york';
-    } else {
-      newCity = 'los-angeles';
-    }
-    
-    setCurrentCity(newCity);
-    
+    const nextCity = getNextCity(currentCity);
+    setCurrentCity(nextCity);
+
     if (map.current) {
-      const cityData = {
-        'los-angeles': {
-          center: [-118.2500, 34.0500], // Downtown LA Financial District cables
-          zoom: 17,
-          pitch: 60,
-          bearing: 0
-        },
-        'san-francisco': {
-          center: [-122.4000, 37.7900], // SF Financial District cables
-          zoom: 17,
-          pitch: 60,
-          bearing: 0
-        },
-        'paradise-city': {
-          center: [-118.3000, 33.8000], // Paradise City center
-          zoom: 17,
-          pitch: 60,
-          bearing: 0
-        },
-        'new-york': {
-          center: [-74.0060, 40.7128], // NYC Financial District
-          zoom: 17,
-          pitch: 60,
-          bearing: 0
-        }
-      };
-      
+      const cityConfig = CITY_CONFIG[nextCity];
       map.current.flyTo({
-        center: cityData[newCity].center,
-        zoom: cityData[newCity].zoom,
-        pitch: cityData[newCity].pitch,
-        bearing: cityData[newCity].bearing,
+        center: cityConfig.center,
+        zoom: cityConfig.zoom,
+        pitch: cityConfig.pitch,
+        bearing: cityConfig.bearing,
         duration: 2500,
         easing: (t) => t * (2 - t) // Smooth easing
       });
     }
   };
 
-  const getCityName = () => {
-    const cityNames = {
-      'los-angeles': 'Los Angeles Cable Network',
-      'san-francisco': 'San Francisco Cable Network',
-      'paradise-city': 'Paradise City Cable Network',
-      'new-york': 'New York City Cable Network'
-    };
-    return cityNames[currentCity];
-  };
+  // Get current city name - Uses modular CITY_CONFIG
+  const getCityName = () => CITY_CONFIG[currentCity].name;
 
       // Los Angeles Cable Network Data - Multiple cables per route
   const cableNetworkData = {
@@ -1847,6 +1807,26 @@ const LosAngelesMap = () => {
           coordinates: [-118.2500, 33.7775]
         }
       },
+      // Tower 27/222 - Camp Fire Case Study (Actual Paradise, CA Location)
+      {
+        type: "Feature",
+        properties: {
+          id: "tower-27-222",
+          name: "Tower 27/222",
+          type: "transmission-tower",
+          location: "Pulga, CA (Camp Fire Origin)",
+          status: "operational",
+          color: "#00ff88",
+          cci: 0.3, // Component Condition Index - starts healthy
+          temperature: 28,
+          vibration: 0.5,
+          strain: 0.2
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [-121.5039, 39.8039] // Tower 27/222 exact coordinates
+        }
+      },
       // New York City Cable Network Data - Multiple cables per route
       {
         type: "Feature",
@@ -2380,8 +2360,8 @@ const LosAngelesMap = () => {
         map.current = new mapboxgl.Map({
           container: mapContainer.current,
           style: 'mapbox://styles/mapbox/dark-v11', // Dark modern style
-          center: [-118.2437, 34.0522], // Downtown Los Angeles center
-          zoom: 16, // Much closer zoom to see buildings in detail
+          center: [-121.5795, 39.7596], // Paradise, CA center (Camp Fire location)
+          zoom: 14, // Wider view to see Tower 27/222 and surrounding area
           pitch: 60, // 3D perspective
           bearing: 0,
           antialias: true,
@@ -2563,7 +2543,32 @@ const LosAngelesMap = () => {
           ]);
           map.current.setPaintProperty('overhead-cables', 'line-opacity', 0.9);
         });
-        
+
+        // Click handler for transmission towers (Tower 27/222)
+        map.current.on('click', 'transmission-towers', (e) => {
+          console.log('Transmission tower clicked!', e);
+          const features = map.current.queryRenderedFeatures(e.point, {
+            layers: ['transmission-towers']
+          });
+          console.log('Tower features found:', features);
+          if (features.length > 0) {
+            const towerData = features[0].properties;
+            console.log('Tower data:', towerData);
+            setSelectedCable(towerData); // Reuse selectedCable state for tower info
+            // Show alert about Camp Fire analysis
+            alert(`Tower 27/222 - Camp Fire Case Study\n\nLocation: ${towerData.location}\nStatus: ${towerData.status}\n\nClick "Camp Fire Analysis" tab to view time-slider degradation simulation.`);
+          }
+        });
+
+        // Hover effects for transmission towers
+        map.current.on('mouseenter', 'transmission-towers', () => {
+          map.current.getCanvas().style.cursor = 'pointer';
+        });
+
+        map.current.on('mouseleave', 'transmission-towers', () => {
+          map.current.getCanvas().style.cursor = '';
+        });
+
         // Add subtle cable glow effect for realism
         map.current.addLayer({
           id: 'cable-glow',
@@ -2693,6 +2698,54 @@ const LosAngelesMap = () => {
             'circle-stroke-color': '#ffffff',
             'circle-stroke-width': 2,
             'circle-opacity': 0.9
+          }
+        });
+
+        // Add transmission towers (Tower 27/222 - Camp Fire Case Study)
+        map.current.addLayer({
+          id: 'transmission-towers',
+          type: 'circle',
+          source: 'cable-network',
+          filter: ['==', ['get', 'type'], 'transmission-tower'],
+          paint: {
+            'circle-color': [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              '#ff00ff', // Bright magenta on hover
+              '#00ff88'  // Green default
+            ],
+            'circle-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              10, 6,
+              15, 12,
+              20, 20
+            ],
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 3,
+            'circle-opacity': 0.95
+          }
+        });
+
+        // Add transmission tower glow effect
+        map.current.addLayer({
+          id: 'transmission-towers-glow',
+          type: 'circle',
+          source: 'cable-network',
+          filter: ['==', ['get', 'type'], 'transmission-tower'],
+          paint: {
+            'circle-color': '#00ff88',
+            'circle-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              10, 12,
+              15, 24,
+              20, 40
+            ],
+            'circle-opacity': 0.2,
+            'circle-blur': 3
           }
         });
 
@@ -2852,7 +2905,7 @@ const LosAngelesMap = () => {
             <div className="legend-line solid" style={{backgroundColor: '#00ff88'}}></div>
             <span>Phase C</span>
           </motion.div>
-          <motion.div 
+          <motion.div
             className="legend-item"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -2860,6 +2913,15 @@ const LosAngelesMap = () => {
           >
             <div className="legend-circle" style={{backgroundColor: '#00ff88'}}></div>
             <span>Monitor Sensor</span>
+          </motion.div>
+          <motion.div
+            className="legend-item"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 1.3 }}
+          >
+            <div className="legend-circle" style={{backgroundColor: '#00ff88', border: '3px solid white', width: '12px', height: '12px'}}></div>
+            <span>Tower 27/222 (Camp Fire)</span>
           </motion.div>
         </motion.div>
       </motion.div>
