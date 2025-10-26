@@ -13,8 +13,24 @@ from datetime import datetime, timedelta
 from flask import Flask, render_template, jsonify
 import threading
 import time
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
+
+# Register blueprints
+from backend.elasticsearch_proxy import bp as elasticsearch_bp
+from backend.rul_api import bp as rul_bp
+
+app.register_blueprint(elasticsearch_bp)
+app.register_blueprint(rul_bp)
+
+# Initialize RUL model
+from backend.rul_api import load_rul_artifacts
+load_rul_artifacts()
 
 class LiveWireDataFetcher:
     """Fetches data from Elastic Serverless for dashboard"""

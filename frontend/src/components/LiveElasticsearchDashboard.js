@@ -1,22 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RefreshCw, Activity, ExternalLink, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import './ElasticsearchDashboard.css';
 
 const LiveElasticsearchDashboard = () => {
-  // Your actual Elasticsearch dashboard data (from the screenshot you shared)
-  const [sensorData] = useState({
-    avgPower: '691.237',
-    avgStrain: '168.637', 
-    avgTemp: '32.532',
-    avgVibration: '0.828',
-    lastPower: '0.7',
-    lastStrain: '0.3',
-    lastTemp: '62.19',
-    lastVibration: '1.532',
-    totalHits: '365,002 samples'
+  // Fetch real data from backend proxy (no longer hardcoded)
+  const [sensorData, setSensorData] = useState({
+    avgPower: 0,
+    avgStrain: 0,
+    avgTemp: 0,
+    avgVibration: 0,
+    maxPower: 0,
+    maxTemp: 0,
+    sampleCount: 0,
+    riskZones: {}
   });
 
-  const [lastUpdated] = useState(new Date());
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [loading, setLoading] = useState(true);
+  const [alerts, setAlerts] = useState([]);
+  const [error, setError] = useState(null);
+
+  // Fetch sensor data from backend every 5 seconds
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/sensor-data');
+        if (!response.ok) throw new Error('Failed to fetch sensor data');
+        const data = await response.json();
+        setSensorData(data);
+        setLastUpdated(new Date());
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        console.error('Error fetching sensor data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch alerts from backend every 10 seconds
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const response = await fetch('/api/alerts');
+        if (!response.ok) throw new Error('Failed to fetch alerts');
+        const data = await response.json();
+        setAlerts(data.alerts || []);
+      } catch (err) {
+        console.error('Error fetching alerts:', err);
+      }
+    };
+
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, 10000); // Poll every 10 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   // Open the full Elasticsearch dashboard
   const openDashboard = () => {
@@ -30,10 +73,26 @@ const LiveElasticsearchDashboard = () => {
   const openKibana = () => {
     window.open(
       'https://my-elasticsearch-project-c80e6e.kb.us-west1.gcp.elastic.cloud/app/r/s/oxRR4',
-      '_blank', 
+      '_blank',
       'noopener,noreferrer'
     );
   };
+
+  if (loading) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <p>Loading real-time data from Elasticsearch...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: '20px', color: 'red' }}>
+        <p>Error: {error}</p>
+      </div>
+    );
+  }
 
   const getStatusColor = (value, type) => {
     const numValue = parseFloat(value);
@@ -175,8 +234,8 @@ const LiveElasticsearchDashboard = () => {
               </span>
             </div>
             <div className="secondary-value">
-              <span className="label">Current</span>
-              <span className="value">{sensorData.lastVibration}</span>
+              <span className="label">Max</span>
+              <span className="value">{sensorData.maxTemp || 'N/A'}</span>
             </div>
           </div>
         </div>
