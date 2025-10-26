@@ -8,7 +8,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from 'recharts';
 import { X, AlertCircle, Zap, TrendingDown, TrendingUp } from 'lucide-react';
 import './SensorDetailsPanel.css';
@@ -29,7 +28,6 @@ import './SensorDetailsPanel.css';
 const SensorDetailsPanel = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [sensorStatus, setSensorStatus] = useState(null);
-  const [historicalData, setHistoricalData] = useState([]);
   const [summary, setSummary] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
@@ -48,11 +46,13 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
 
   // Track panel open time for elapsed time on live graph
   const panelOpenTimeRef = useRef(null);
+  const chartScrollRef = useRef(null);
 
   // Fetch sensor data from Phase 3 live component API
   const fetchSensorData = async () => {
     try {
       setError(null);
+      console.log('📊 Polling for sensor data...');
 
       // Check if component is initialized
       let statusRes = await fetch('/api/live-component/status');
@@ -105,22 +105,71 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
         panelOpenTimeRef.current = Date.now();
       }
 
-      // Add to RUL trend data as LIVE feed (shows elapsed time since panel opened)
-      if (statusData.rul_prediction?.rul_hours !== undefined) {
-        const elapsedSeconds = Math.round((Date.now() - panelOpenTimeRef.current) / 1000);
+      // Add to RUL trend data as LIVE feed - either real Pi data or simulated
+      // Only add live data AFTER baseline has loaded
+      // Use fixed-size window (last 200 points) for smooth Recharts real-time rendering
+      setRulTrendData((prev) => {
+        // Get the last data point to continue the trend
+        const lastPoint = prev[prev.length - 1];
+        if (!lastPoint) {
+          console.log(`⏳ Waiting for baseline to load... current trend data length: ${prev.length}`);
+          return prev; // Wait for baseline to load
+        }
+
+        let newRul;
+        let dataSource;
+        let riskZone;
+
+        if (elasticAvailable && statusData.rul_prediction?.rul_hours !== undefined) {
+          // Pi is connected - use real data
+          newRul = statusData.rul_prediction.rul_hours;
+          riskZone = statusData.rul_prediction.risk_zone;
+          dataSource = 'pi';
+        } else {
+          // Pi not connected - generate synthetic degradation
+          // Simulate gradual decline with smooth, consistent degradation
+          const lastRul = lastPoint.rul;
+          const degradationRate = 0.1 + Math.random() * 0.05; // 0.1-0.15 h per 500ms update (smooth curve)
+          newRul = Math.max(10, lastRul - degradationRate); // Don't go below 10h
+
+          // Determine risk zone based on RUL
+          if (newRul > 250) riskZone = 'green';
+          else if (newRul > 100) riskZone = 'yellow';
+          else if (newRul > 50) riskZone = 'orange';
+          else riskZone = 'red';
+
+          dataSource = 'simulated';
+        }
+
+        // Extract just the number from timestamp (e.g., "160s" -> 160)
+        const lastTimestamp = parseInt(lastPoint.timestamp);
+        const newTimestamp = lastTimestamp + 0.5; // Add 0.5 seconds per 500ms update
+
         const newTrendPoint = {
-          timestamp: `${elapsedSeconds}s`, // Elapsed time since panel opened
-          rul: statusData.rul_prediction.rul_hours,
-          riskZone: statusData.rul_prediction.risk_zone,
-          dataSource: statusData.data_source,
+          timestamp: `${newTimestamp}s`,
+          rul: newRul,
+          riskZone: riskZone,
+          dataSource: dataSource,
         };
 
-        setRulTrendData((prev) => {
-          const updated = [...prev, newTrendPoint];
-          // Keep last 150 points to show scrolling window of data
-          return updated.slice(-150);
-        });
-      }
+        // Check if we already have this timestamp
+        const hasTimestamp = prev.some(point => point.timestamp === newTrendPoint.timestamp);
+        if (hasTimestamp) {
+          return prev;
+        }
+
+        // Keep only last 200 points for smooth real-time rendering with Recharts
+        // This prevents full re-renders and keeps chart responsive
+        // 200 points at 500ms = 100 seconds of rolling window
+        const MAX_POINTS = 200;
+        let updated = [...prev, newTrendPoint];
+        if (updated.length > MAX_POINTS) {
+          updated = updated.slice(-MAX_POINTS);
+        }
+
+        console.log(`📈 Live point: ${newTrendPoint.timestamp} RUL=${newTrendPoint.rul.toFixed(1)}h (${dataSource}) | Display: ${updated.length}/${prev.length} points`);
+        return updated;
+      });
 
       // Fetch historical baseline data (35 days of simulated data)
       const historyRes = await fetch('/api/live-component/history?days=35&interval=2');
@@ -134,37 +183,38 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
         historyData = { readings: [] };
       }
 
-      // Populate LIVE graph with baseline simulated data on first load
-      // This shows what the component's RUL looked like over time (the "history")
-      if (historyData.readings && Array.isArray(historyData.readings) && rulTrendData.length === 0) {
-        const baselineGraphData = historyData.readings.map((_, index) => {
-          // Simulate baseline RUL: mostly stable around 300-320h with small random variations
-          // This represents the "natural" RUL trend before any dramatic degradation
-          const baseRul = 310;
-          const variation = Math.sin(index * 0.1) * 15; // Small oscillations
-          const baselineRul = baseRul + variation;
-          return {
-            timestamp: `${index * 2}s`, // X-axis shows elapsed seconds (0s, 2s, 4s, ... progressing left to right)
-            rul: baselineRul,
-            riskZone: 'green', // Baseline is stable
-            dataSource: 'baseline',
-          };
-        });
-        setRulTrendData(baselineGraphData);
-        console.log(`📊 Loaded ${baselineGraphData.length} baseline data points to live graph`);
-      }
+      // Populate LIVE graph with baseline simulated data on FIRST LOAD ONLY
+      // This shows what a healthy component's RUL looks like over time
+      // RUL stays relatively stable (300-350h) because degradation happens over YEARS, not hours
+      setRulTrendData((prev) => {
+        // Only load baseline once (when graph is empty)
+        if (prev.length === 0 && historyData.readings && Array.isArray(historyData.readings)) {
+          // Use fixed-size window for baseline too (last 200 points = ~6.7 minutes at 2s intervals)
+          const readings = historyData.readings;
+          const MAX_BASELINE_POINTS = 200;
+          const startIdx = Math.max(0, readings.length - MAX_BASELINE_POINTS);
 
-      // Format history data for other uses
-      if (historyData.readings && Array.isArray(historyData.readings)) {
-        const formattedData = historyData.readings.map((reading) => ({
-          timestamp: new Date(reading.timestamp).toLocaleDateString(),
-          rul: reading.rul_true || 0,
-          temp: reading.sensor_2 || 0,
-          vibration: reading.sensor_1 || 0,
-          strain: reading.sensor_3 || 0,
-        }));
-        setHistoricalData(formattedData);
-      }
+          const baselineGraphData = readings.slice(startIdx).map((_, localIdx) => {
+            // For a healthy component, RUL stays relatively constant around 300-320h
+            // with only minor variations due to sensor noise
+            const baseRul = 310;
+            const noise = (Math.random() - 0.5) * 20; // Small random variation (±10h)
+            const baselineRul = baseRul + noise;
+
+            return {
+              timestamp: `${(startIdx + localIdx) * 2}s`, // X-axis shows elapsed seconds
+              rul: baselineRul,
+              riskZone: 'green', // Baseline is always healthy
+              dataSource: 'baseline',
+            };
+          });
+          console.log(`📊 ✅ Loaded ${baselineGraphData.length}/${readings.length} baseline points to live graph - Ready for live data!`);
+          return baselineGraphData;
+        }
+        return prev; // Don't reload baseline if graph already has data
+      });
+
+      // Format history data for other uses (currently unused, keeping for future analytics)
 
       // Fetch summary
       const summaryRes = await fetch('/api/live-component/summary');
@@ -187,7 +237,20 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
     }
   };
 
+  // Auto-scroll chart to show latest data (with debouncing to prevent jank)
+  useEffect(() => {
+    if (chartScrollRef.current && rulTrendData.length % 5 === 0) {
+      // Scroll every 5 updates (every 2.5 seconds) to reduce re-layout thrashing
+      setTimeout(() => {
+        if (chartScrollRef.current) {
+          chartScrollRef.current.scrollLeft = chartScrollRef.current.scrollWidth;
+        }
+      }, 0);
+    }
+  }, [rulTrendData]);
+
   // Initial fetch and setup polling
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!isOpen) return;
 
@@ -196,12 +259,12 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
     // Fetch immediately
     fetchSensorData();
 
-    // Poll for updates: 2 seconds when Elasticsearch available, 10 seconds otherwise
-    // This will be determined after first fetch
+    // Poll for updates: 500ms for smooth live updates
+    // Faster polling = smoother animation = more "live" feel
     let interval;
 
     const startPolling = () => {
-      interval = setInterval(fetchSensorData, elasticAvailable ? 2000 : 10000);
+      interval = setInterval(fetchSensorData, 500); // 500ms = 2 data points per second for smooth scrolling
     };
 
     startPolling();
@@ -618,8 +681,8 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
                           </p>
                         </div>
                       </div>
-                      <div className="chart-container">
-                        <ResponsiveContainer width="100%" height={220}>
+                      <div className="chart-container" ref={chartScrollRef} style={{overflowX: 'auto', overflowY: 'hidden'}}>
+                        <ResponsiveContainer width={Math.max(800, rulTrendData.length * 12)} height={220}>
                           <LineChart data={rulTrendData}>
                             <CartesianGrid
                               strokeDasharray="3 3"
@@ -685,8 +748,8 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
                           </p>
                         </div>
                       </div>
-                      <div className="chart-container">
-                        <ResponsiveContainer width="100%" height={220}>
+                      <div className="chart-container" style={{overflowX: 'auto', overflowY: 'hidden'}}>
+                        <ResponsiveContainer width={Math.max(800, speedupTrendData.length * 15)} height={220}>
                           <LineChart data={speedupTrendData}>
                             <CartesianGrid
                               strokeDasharray="3 3"
