@@ -1,0 +1,3 @@
+dataset,model,accuracy,training_time,prediction_time
+power_grid_enhanced,Enhanced Grid Risk Model,0.335,0.154429,0.1538
+power_grid_enhanced,Enhanced CCI Model,0.32894736842105265,3.541928,0.009231

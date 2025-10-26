@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LiveWire Simple Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5; 
+        }
+        .header { 
+            text-align: center; 
+            color: #333; 
+            margin-bottom: 30px; 
+        }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; 
+        }
+        .card { 
+            background: white; 
+            border-radius: 8px; 
+            padding: 20px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .metric { 
+            text-align: center; 
+            margin: 10px 0; 
+        }
+        .metric-value { 
+            font-size: 32px; 
+            font-weight: bold; 
+            color: #007cba; 
+        }
+        .metric-label { 
+            font-size: 14px; 
+            color: #666; 
+        }
+        .status-green { 
+            background: #4CAF50; 
+            color: white; 
+            padding: 10px; 
+            border-radius: 5px; 
+            text-align: center;
+            font-weight: bold;
+        }
+        .status-red { 
+            background: #F44336; 
+            color: white; 
+            padding: 10px; 
+            border-radius: 5px; 
+            text-align: center;
+            font-weight: bold;
+        }
+        .status-yellow { 
+            background: #FF9800; 
+            color: white; 
+            padding: 10px; 
+            border-radius: 5px; 
+            text-align: center;
+            font-weight: bold;
+        }
+        .refresh-btn {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚡ LiveWire Infrastructure Dashboard</h1>
+        <p>Real-time monitoring of power grid components</p>
+        <button class="refresh-btn" onclick="loadData()">🔄 Refresh Data</button>
+        <span id="last-update"></span>
+    </div>
+    
+    <div id="dashboard-content" class="grid">
+        <div class="card">
+            <h3>Loading sensor data...</h3>
+            <p>Please wait while we fetch the latest readings from Elasticsearch.</p>
+        </div>
+    </div>
+
+    <script>
+        async function loadData() {
+            try {
+                document.getElementById('last-update').textContent = 'Loading...';
+                
+                // This would normally fetch from your Flask API
+                // For now, we'll simulate with static data
+                const mockData = {
+                    'CABLE_DEMO_001': [
+                        {
+                            timestamp: new Date().toISOString(),
+                            temperature: 28.67,
+                            vibration: 0.286,
+                            strain: 136.1,
+                            power: 968.9,
+                            risk_zone: 'green',
+                            confidence: 0.89
+                        }
+                    ]
+                };
+                
+                updateDashboard(mockData);
+                document.getElementById('last-update').textContent = 
+                    'Last updated: ' + new Date().toLocaleTimeString();
+                    
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('dashboard-content').innerHTML = 
+                    '<div class="card"><h3>Error loading data</h3><p>' + error + '</p></div>';
+            }
+        }
+        
+        function updateDashboard(data) {
+            let html = '';
+            
+            for (const [componentId, readings] of Object.entries(data)) {
+                if (readings.length === 0) continue;
+                
+                const latest = readings[0];
+                const statusClass = `status-${latest.risk_zone || 'green'}`;
+                
+                html += `
+                    <div class="card">
+                        <h3>${componentId}</h3>
+                        <div class="${statusClass}">
+                            ${(latest.risk_zone || 'unknown').toUpperCase()} ZONE
+                            (${Math.round((latest.confidence || 0) * 100)}% confidence)
+                        </div>
+                        
+                        <div class="metric">
+                            <div class="metric-value">${latest.temperature?.toFixed(1) || 'N/A'}°C</div>
+                            <div class="metric-label">Temperature</div>
+                        </div>
+                        
+                        <div class="metric">
+                            <div class="metric-value">${latest.vibration?.toFixed(3) || 'N/A'}g</div>
+                            <div class="metric-label">Vibration</div>
+                        </div>
+                        
+                        <div class="metric">
+                            <div class="metric-value">${latest.strain?.toFixed(0) || 'N/A'}µε</div>
+                            <div class="metric-label">Strain</div>
+                        </div>
+                        
+                        <div class="metric">
+                            <div class="metric-value">${latest.power?.toFixed(0) || 'N/A'}W</div>
+                            <div class="metric-label">Power</div>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <small>Last reading: ${new Date(latest.timestamp).toLocaleString()}</small>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add instructions card
+            html += `
+                <div class="card">
+                    <h3>📊 Next Steps</h3>
+                    <p><strong>Kibana Dashboard:</strong></p>
+                    <ul>
+                        <li>Open Kibana in the browser tab</li>
+                        <li>Go to Stack Management → Data Views</li>
+                        <li>Create data view: metrics-livewire.sensors-*</li>
+                        <li>Go to Analytics → Dashboard</li>
+                        <li>Create visualizations for your sensor data</li>
+                    </ul>
+                    <p><strong>Live Data:</strong> Your sensor is running and sending data every 3 seconds!</p>
+                </div>
+            `;
+            
+            document.getElementById('dashboard-content').innerHTML = html;
+        }
+        
+        // Load data on page load
+        loadData();
+        
+        // Auto-refresh every 10 seconds
+        setInterval(loadData, 10000);
+    </script>
+</body>
+</html>

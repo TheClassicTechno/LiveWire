@@ -1,0 +1,11 @@
+approach,dataset,accuracy,prediction_result,performance_rating
+Camp Fire Prediction (Grid Risk),MODIS Satellite,N/A,308 days warning,🟢 EXCELLENT
+Camp Fire Prediction (CCI Model),MODIS Satellite,N/A,Sequence-based warning,🟢 EXCELLENT
+Power Grid Testing (Grid Risk),Electrical Faults,44.5%,Fault detection,🔴 POOR
+Power Grid Testing (CCI Model),Electrical Faults,51.7%,Fault classification,🔴 POOR
+Simple Power Grid Models,Electrical Faults,~50%,Simplified approach,🔴 POOR
+Basic Cascade Grid Risk Model,Cascade Failures,56.7%,Network topology,🟠 MODERATE
+Basic Cascade CCI Model,Cascade Failures,56.7%,Network topology,🟠 MODERATE
+Enhanced Random Forest,Enhanced Cascade,53.3%,Advanced features,🔴 POOR
+Enhanced Gradient Boosting,Enhanced Cascade,56.7%,Advanced features,🟠 MODERATE
+Enhanced Neural Network,Enhanced Cascade,70.0%,Advanced features,🟡 GOOD

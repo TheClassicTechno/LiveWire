@@ -1,0 +1,5 @@
+feature_set,mean_accuracy,std_accuracy,num_features
+All Features,0.64,0.14628738838327793,23
+Top 10 Features,0.6399999999999999,0.08,10
+Top 15 Features,0.6300000000000001,0.11224972160321822,15
+Top 20 Features,0.61,0.13564659966250536,20

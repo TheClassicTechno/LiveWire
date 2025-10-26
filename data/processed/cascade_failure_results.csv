@@ -1,0 +1,3 @@
+dataset,model,accuracy,f1_score,training_time,prediction_time
+cascade_failures,Cascade Grid Risk Model,0.5666666666666667,0.40992907801418443,0.321764,0.130599
+cascade_failures,Cascade CCI Model,0.5666666666666667,0.5523809523809523,0.224388,0.006081
