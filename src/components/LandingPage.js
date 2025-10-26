@@ -17,7 +17,7 @@ const LandingPage = () => {
   const [mapLoaded, setMapLoaded] = useState(false);
 
   const handleGetStarted = () => {
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
   const toggleMobileMenu = () => {
@@ -31,7 +31,7 @@ const LandingPage = () => {
     try {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/satellite-streets-v12',
+        style: "mapbox://styles/mapbox/satellite-streets-v12",
         center: [0, 0],
         zoom: 1.2,
         pitch: 0,
@@ -45,13 +45,16 @@ const LandingPage = () => {
         doubleClickZoom: true,
         keyboard: true,
         touchZoomRotate: true,
-        accessToken: process.env.REACT_APP_MAPBOX_TOKEN
+        accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
       });
 
-      map.current.on('load', () => {
+      map.current.on("load", () => {
         setMapLoaded(true);
-        console.log('World map loaded and interactive:', map.current.isStyleLoaded());
-        
+        console.log(
+          "World map loaded and interactive:",
+          map.current.isStyleLoaded()
+        );
+
         // Add global electrical cable network connecting all countries
         const globalCableData = {
           type: "FeatureCollection",
@@ -64,16 +67,16 @@ const LandingPage = () => {
                 voltage: "500kV",
                 capacity: "2GW",
                 color: "#ffd700",
-                status: "operational"
+                status: "operational",
               },
               geometry: {
                 type: "LineString",
                 coordinates: [
                   [-74.0, 40.7], // New York
                   [-25.0, 40.0], // Portugal
-                  [-9.0, 38.7]   // Lisbon
-                ]
-              }
+                  [-9.0, 38.7], // Lisbon
+                ],
+              },
             },
             // North America to Asia
             {
@@ -83,15 +86,15 @@ const LandingPage = () => {
                 voltage: "500kV",
                 capacity: "1.8GW",
                 color: "#ffd700",
-                status: "operational"
+                status: "operational",
               },
               geometry: {
                 type: "LineString",
                 coordinates: [
                   [-122.4, 37.8], // San Francisco
-                  [139.7, 35.7]   // Tokyo
-                ]
-              }
+                  [139.7, 35.7], // Tokyo
+                ],
+              },
             },
             // Europe to Africa
             {
@@ -101,16 +104,16 @@ const LandingPage = () => {
                 voltage: "400kV",
                 capacity: "1.5GW",
                 color: "#ffd700",
-                status: "operational"
+                status: "operational",
               },
               geometry: {
                 type: "LineString",
                 coordinates: [
-                  [2.3, 48.9],    // Paris
-                  [31.2, 30.0],   // Cairo
-                  [18.4, -33.9]   // Cape Town
-                ]
-              }
+                  [2.3, 48.9], // Paris
+                  [31.2, 30.0], // Cairo
+                  [18.4, -33.9], // Cape Town
+                ],
+              },
             },
             // Asia to Europe
             {
@@ -120,18 +123,18 @@ const LandingPage = () => {
                 voltage: "500kV",
                 capacity: "2.2GW",
                 color: "#ffd700",
-                status: "operational"
+                status: "operational",
               },
               geometry: {
                 type: "LineString",
                 coordinates: [
-                  [103.8, 1.3],   // Singapore
-                  [80.0, 25.0],   // India
-                  [50.0, 30.0],   // Middle East
-                  [30.0, 40.0],   // Turkey
-                  [2.3, 48.9]     // Paris
-                ]
-              }
+                  [103.8, 1.3], // Singapore
+                  [80.0, 25.0], // India
+                  [50.0, 30.0], // Middle East
+                  [30.0, 40.0], // Turkey
+                  [2.3, 48.9], // Paris
+                ],
+              },
             },
             // Asia to Australia
             {
@@ -141,15 +144,15 @@ const LandingPage = () => {
                 voltage: "400kV",
                 capacity: "1GW",
                 color: "#ffd700",
-                status: "operational"
+                status: "operational",
               },
               geometry: {
                 type: "LineString",
                 coordinates: [
-                  [103.8, 1.3],   // Singapore
-                  [151.2, -33.9]  // Sydney
-                ]
-              }
+                  [103.8, 1.3], // Singapore
+                  [151.2, -33.9], // Sydney
+                ],
+              },
             },
             // South America Network
             {
@@ -159,7 +162,7 @@ const LandingPage = () => {
                 voltage: "500kV",
                 capacity: "1.2GW",
                 color: "#ffd700",
-                status: "operational"
+                status: "operational",
               },
               geometry: {
                 type: "LineString",
@@ -167,9 +170,9 @@ const LandingPage = () => {
                   [-46.6, -23.5], // São Paulo
                   [-43.2, -22.9], // Rio de Janeiro
                   [-58.4, -34.6], // Buenos Aires
-                  [-70.7, -33.4]  // Santiago
-                ]
-              }
+                  [-70.7, -33.4], // Santiago
+                ],
+              },
             },
             // North America Network
             {
@@ -179,17 +182,17 @@ const LandingPage = () => {
                 voltage: "765kV",
                 capacity: "3GW",
                 color: "#ffd700",
-                status: "operational"
+                status: "operational",
               },
               geometry: {
                 type: "LineString",
                 coordinates: [
-                  [-74.0, 40.7],  // New York
-                  [-87.6, 41.9],  // Chicago
-                  [-95.4, 29.8],  // Houston
-                  [-122.4, 37.8]  // San Francisco
-                ]
-              }
+                  [-74.0, 40.7], // New York
+                  [-87.6, 41.9], // Chicago
+                  [-95.4, 29.8], // Houston
+                  [-122.4, 37.8], // San Francisco
+                ],
+              },
             },
             // Europe Network
             {
@@ -199,18 +202,18 @@ const LandingPage = () => {
                 voltage: "400kV",
                 capacity: "2.5GW",
                 color: "#ffd700",
-                status: "operational"
+                status: "operational",
               },
               geometry: {
                 type: "LineString",
                 coordinates: [
-                  [2.3, 48.9],    // Paris
-                  [4.9, 52.4],    // Amsterdam
-                  [13.4, 52.5],   // Berlin
-                  [12.5, 41.9],   // Rome
-                  [2.3, 48.9]     // Back to Paris
-                ]
-              }
+                  [2.3, 48.9], // Paris
+                  [4.9, 52.4], // Amsterdam
+                  [13.4, 52.5], // Berlin
+                  [12.5, 41.9], // Rome
+                  [2.3, 48.9], // Back to Paris
+                ],
+              },
             },
             // Asia Network
             {
@@ -220,18 +223,18 @@ const LandingPage = () => {
                 voltage: "500kV",
                 capacity: "3.5GW",
                 color: "#ffd700",
-                status: "operational"
+                status: "operational",
               },
               geometry: {
                 type: "LineString",
                 coordinates: [
-                  [139.7, 35.7],  // Tokyo
-                  [121.5, 31.2],  // Shanghai
-                  [103.8, 1.3],    // Singapore
-                  [77.2, 28.6],   // Delhi
-                  [139.7, 35.7]   // Back to Tokyo
-                ]
-              }
+                  [139.7, 35.7], // Tokyo
+                  [121.5, 31.2], // Shanghai
+                  [103.8, 1.3], // Singapore
+                  [77.2, 28.6], // Delhi
+                  [139.7, 35.7], // Back to Tokyo
+                ],
+              },
             },
             // Africa Network
             {
@@ -241,18 +244,18 @@ const LandingPage = () => {
                 voltage: "400kV",
                 capacity: "1.8GW",
                 color: "#ffd700",
-                status: "operational"
+                status: "operational",
               },
               geometry: {
                 type: "LineString",
                 coordinates: [
-                  [31.2, 30.0],   // Cairo
-                  [18.4, -33.9],  // Cape Town
-                  [3.4, 6.4],     // Lagos
-                  [36.8, -1.3],   // Nairobi
-                  [31.2, 30.0]    // Back to Cairo
-                ]
-              }
+                  [31.2, 30.0], // Cairo
+                  [18.4, -33.9], // Cape Town
+                  [3.4, 6.4], // Lagos
+                  [36.8, -1.3], // Nairobi
+                  [31.2, 30.0], // Back to Cairo
+                ],
+              },
             },
             // Additional Intercontinental Connections
             {
@@ -262,16 +265,16 @@ const LandingPage = () => {
                 voltage: "500kV",
                 capacity: "800MW",
                 color: "#ffd700",
-                status: "operational"
+                status: "operational",
               },
               geometry: {
                 type: "LineString",
                 coordinates: [
-                  [-74.0, 40.7],  // New York
-                  [-20.0, 70.0],  // Iceland
-                  [2.3, 48.9]     // Paris
-                ]
-              }
+                  [-74.0, 40.7], // New York
+                  [-20.0, 70.0], // Iceland
+                  [2.3, 48.9], // Paris
+                ],
+              },
             },
             {
               type: "Feature",
@@ -280,75 +283,75 @@ const LandingPage = () => {
                 voltage: "400kV",
                 capacity: "1.2GW",
                 color: "#ffd700",
-                status: "operational"
+                status: "operational",
               },
               geometry: {
                 type: "LineString",
                 coordinates: [
-                  [103.8, 1.3],   // Singapore
-                  [55.2, 25.2],   // Dubai
-                  [18.4, -33.9]   // Cape Town
-                ]
-              }
-            }
-          ]
+                  [103.8, 1.3], // Singapore
+                  [55.2, 25.2], // Dubai
+                  [18.4, -33.9], // Cape Town
+                ],
+              },
+            },
+          ],
         };
 
         // Add cable network source
-        map.current.addSource('global-cables', {
-          type: 'geojson',
-          data: globalCableData
+        map.current.addSource("global-cables", {
+          type: "geojson",
+          data: globalCableData,
         });
 
         // Add cable lines
         map.current.addLayer({
-          id: 'global-cable-lines',
-          type: 'line',
-          source: 'global-cables',
+          id: "global-cable-lines",
+          type: "line",
+          source: "global-cables",
           layout: {
-            'line-join': 'round',
-            'line-cap': 'round'
+            "line-join": "round",
+            "line-cap": "round",
           },
           paint: {
-            'line-color': ['get', 'color'],
-            'line-width': 4,
-            'line-opacity': 0.8
-          }
+            "line-color": ["get", "color"],
+            "line-width": 4,
+            "line-opacity": 0.8,
+          },
         });
 
         // Add cable glow effect
         map.current.addLayer({
-          id: 'global-cable-glow',
-          type: 'line',
-          source: 'global-cables',
+          id: "global-cable-glow",
+          type: "line",
+          source: "global-cables",
           layout: {
-            'line-join': 'round',
-            'line-cap': 'round'
+            "line-join": "round",
+            "line-cap": "round",
           },
           paint: {
-            'line-color': ['get', 'color'],
-            'line-width': 8,
-            'line-opacity': 0.3,
-            'line-blur': 2
-          }
+            "line-color": ["get", "color"],
+            "line-width": 8,
+            "line-opacity": 0.3,
+            "line-blur": 2,
+          },
         });
 
         // Add cable markers
         map.current.addLayer({
-          id: 'global-cable-markers',
-          type: 'circle',
-          source: 'global-cables',
+          id: "global-cable-markers",
+          type: "circle",
+          source: "global-cables",
           paint: {
-            'circle-color': ['get', 'color'],
-            'circle-radius': 6,
-            'circle-stroke-color': '#ffffff',
-            'circle-stroke-width': 2,
-            'circle-opacity': 0.9
-          }
+            "circle-color": ["get", "color"],
+            "circle-radius": 6,
+            "circle-stroke-color": "#ffffff",
+            "circle-stroke-width": 2,
+            "circle-opacity": 0.9,
+          },
         });
-        
+
         // Map is now interactive - users can pan, zoom, and rotate manually
-        
+
         // Start automatic rotation
         const rotateWorld = () => {
           if (map.current) {
@@ -356,30 +359,29 @@ const LandingPage = () => {
             map.current.easeTo({
               bearing: currentBearing + 0.5, // Faster rotation
               duration: 100,
-              easing: (t) => t
+              easing: (t) => t,
             });
             requestAnimationFrame(rotateWorld);
           }
         };
-        
+
         // Start rotation after a delay
         setTimeout(() => {
           rotateWorld();
         }, 2000);
-        
+
         // Add click event to test interactivity
-        map.current.on('click', (e) => {
-          console.log('Map clicked at:', e.lngLat);
+        map.current.on("click", (e) => {
+          console.log("Map clicked at:", e.lngLat);
         });
-        
+
         // Add move event to test panning
-        map.current.on('move', () => {
-          console.log('Map moved to:', map.current.getCenter());
+        map.current.on("move", () => {
+          console.log("Map moved to:", map.current.getCenter());
         });
       });
-
     } catch (error) {
-      console.error('Failed to initialize world map:', error);
+      console.error("Failed to initialize world map:", error);
     }
 
     return () => {
@@ -419,7 +421,7 @@ const LandingPage = () => {
       {/* Main content */}
       <div className="landing-container">
         {/* Header */}
-        <motion.header 
+        <motion.header
           className="landing-header"
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -428,24 +430,40 @@ const LandingPage = () => {
           <div className="nav-container">
             <div className="logo-container">
               <Zap className="logo-icon electric-pulse" />
-              <span className="logo-text text-electric">LifeWire</span>
+              <span className="logo-text text-electric">LiveWire</span>
             </div>
-            
+
             <nav className="main-nav">
-              <a href="#products" className="nav-link">Products</a>
-              <a href="#solutions" className="nav-link">Solutions</a>
-              <a href="#developers" className="nav-link">Developers</a>
-              <a href="#company" className="nav-link">Company</a>
-              <a href="#resources" className="nav-link">Resources</a>
-              <a href="#pricing" className="nav-link">Pricing</a>
-              <a href="#contact" className="nav-link">Contact us</a>
+              <a href="#products" className="nav-link">
+                Products
+              </a>
+              <a href="#solutions" className="nav-link">
+                Solutions
+              </a>
+              <a href="#developers" className="nav-link">
+                Developers
+              </a>
+              <a href="#company" className="nav-link">
+                Company
+              </a>
+              <a href="#resources" className="nav-link">
+                Resources
+              </a>
+              <a href="#pricing" className="nav-link">
+                Pricing
+              </a>
+              <a href="#contact" className="nav-link">
+                Contact us
+              </a>
             </nav>
-            
+
             <div className="nav-actions">
               <button className="nav-btn login-btn">Log in</button>
-              <button className="nav-btn signup-btn btn-electric">Sign up</button>
+              <button className="nav-btn signup-btn btn-electric">
+                Sign up
+              </button>
             </div>
-            
+
             <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
               {mobileMenuOpen ? <X /> : <Menu />}
             </button>
@@ -453,61 +471,118 @@ const LandingPage = () => {
         </motion.header>
 
         {/* Mobile Menu */}
-        <motion.div 
-          className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}
+        <motion.div
+          className={`mobile-menu ${mobileMenuOpen ? "open" : ""}`}
           initial={{ opacity: 0, height: 0 }}
-          animate={{ 
-            opacity: mobileMenuOpen ? 1 : 0, 
-            height: mobileMenuOpen ? 'auto' : 0 
+          animate={{
+            opacity: mobileMenuOpen ? 1 : 0,
+            height: mobileMenuOpen ? "auto" : 0,
           }}
           transition={{ duration: 0.3 }}
         >
           <nav className="mobile-nav">
-            <a href="#products" className="mobile-nav-link" onClick={toggleMobileMenu}>Products</a>
-            <a href="#solutions" className="mobile-nav-link" onClick={toggleMobileMenu}>Solutions</a>
-            <a href="#developers" className="mobile-nav-link" onClick={toggleMobileMenu}>Developers</a>
-            <a href="#company" className="mobile-nav-link" onClick={toggleMobileMenu}>Company</a>
-            <a href="#resources" className="mobile-nav-link" onClick={toggleMobileMenu}>Resources</a>
-            <a href="#pricing" className="mobile-nav-link" onClick={toggleMobileMenu}>Pricing</a>
-            <a href="#contact" className="mobile-nav-link" onClick={toggleMobileMenu}>Contact us</a>
+            <a
+              href="#products"
+              className="mobile-nav-link"
+              onClick={toggleMobileMenu}
+            >
+              Products
+            </a>
+            <a
+              href="#solutions"
+              className="mobile-nav-link"
+              onClick={toggleMobileMenu}
+            >
+              Solutions
+            </a>
+            <a
+              href="#developers"
+              className="mobile-nav-link"
+              onClick={toggleMobileMenu}
+            >
+              Developers
+            </a>
+            <a
+              href="#company"
+              className="mobile-nav-link"
+              onClick={toggleMobileMenu}
+            >
+              Company
+            </a>
+            <a
+              href="#resources"
+              className="mobile-nav-link"
+              onClick={toggleMobileMenu}
+            >
+              Resources
+            </a>
+            <a
+              href="#pricing"
+              className="mobile-nav-link"
+              onClick={toggleMobileMenu}
+            >
+              Pricing
+            </a>
+            <a
+              href="#contact"
+              className="mobile-nav-link"
+              onClick={toggleMobileMenu}
+            >
+              Contact us
+            </a>
             <div className="mobile-nav-actions">
-              <button className="mobile-nav-btn login-btn" onClick={toggleMobileMenu}>Log in</button>
-              <button className="mobile-nav-btn signup-btn btn-electric" onClick={toggleMobileMenu}>Sign up</button>
+              <button
+                className="mobile-nav-btn login-btn"
+                onClick={toggleMobileMenu}
+              >
+                Log in
+              </button>
+              <button
+                className="mobile-nav-btn signup-btn btn-electric"
+                onClick={toggleMobileMenu}
+              >
+                Sign up
+              </button>
             </div>
           </nav>
         </motion.div>
 
         {/* Hero section */}
-        <motion.main 
+        <motion.main
           className="hero-section"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           <div className="hero-content">
-            <motion.div 
+            <motion.div
               className="hero-brand"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
               <h1 className="brand-name">
-                <span className="brand-text text-electric text-glow">LifeWire</span>
-                <div className="brand-subtitle">Predict failures up to 308 days before they happen</div>
+                <span className="brand-text text-electric text-glow">
+                  LiveWire
+                </span>
+                <div className="brand-subtitle">
+                  Predict failures up to 308 days before they happen
+                </div>
               </h1>
             </motion.div>
 
-            <motion.p 
+            <motion.p
               className="hero-subtitle"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
             >
-              Identify electrical cable degradation and failure in smart cities using 
-              advanced AI monitoring. Reduce fires, failures, accidents, costs and energy waste.
+              Identify electrical cable degradation and failure in smart cities
+              using advanced AI monitoring. Reduce fires, failures, accidents,
+              costs and energy waste.
             </motion.p>
 
-            <motion.button 
+            <motion.button
               className="btn-electric btn-get-started"
               onClick={handleGetStarted}
               initial={{ opacity: 0, scale: 0.8 }}
@@ -520,7 +595,7 @@ const LandingPage = () => {
               <Zap className="btn-icon" />
             </motion.button>
 
-            <motion.div 
+            <motion.div
               className="hero-features"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -542,7 +617,7 @@ const LandingPage = () => {
           </div>
 
           {/* Rotating World Map */}
-          <motion.div 
+          <motion.div
             className="hero-visual"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -555,7 +630,7 @@ const LandingPage = () => {
               <div className="map-wrapper">
                 <div ref={mapContainer} className="rotating-world-map" />
                 {mapLoaded && (
-                  <motion.div 
+                  <motion.div
                     className="map-overlay"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -563,8 +638,13 @@ const LandingPage = () => {
                   >
                     <div className="cable-legend-overlay">
                       <div className="legend-item">
-                        <div className="legend-color" style={{backgroundColor: '#ffd700'}}></div>
-                        <span className="legend-text">Global Cable Network</span>
+                        <div
+                          className="legend-color"
+                          style={{ backgroundColor: "#ffd700" }}
+                        ></div>
+                        <span className="legend-text">
+                          Global Cable Network
+                        </span>
                       </div>
                     </div>
                   </motion.div>
@@ -587,7 +667,6 @@ const LandingPage = () => {
             </div>
           </motion.div>
         </motion.main>
-
       </div>
     </div>
   );

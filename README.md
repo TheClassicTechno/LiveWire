@@ -368,7 +368,7 @@ LiveWire/
 ## Contributors
 
 - **Backend AI**: @lavirox, @TheClassicTechno
-- **Hardware**: @lizzy
+- **Hardware**: @LizzyC-115
 - **Frontend Dashboard**: @marianaisaw
 
 =======

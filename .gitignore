@@ -199,3 +199,18 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Local development notes (not tracked)
+CLAUDE.md
+*_QUICK_START.md
+*_FILES.md
+*_PLAN.md
+*_README.txt
+*_SUMMARY.md
+*_SETUP.md
+*_READY.md
+START_HERE.md
+TEST_*.md
+*_STRATEGY.md
+*_COMPLETE.md
+*_TRANSMISSION_DATA.md

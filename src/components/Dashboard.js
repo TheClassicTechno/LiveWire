@@ -1,45 +1,45 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Zap, 
-  Activity, 
-  BarChart3, 
-  DollarSign, 
-  Menu, 
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Zap,
+  Activity,
+  BarChart3,
+  DollarSign,
+  Menu,
   X,
   TrendingUp,
-  AlertTriangle
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useCity } from '../contexts/CityContext';
-import HealthVisualization from './HealthVisualization';
-import Analytics from './Analytics';
-import EconomicAssessment from './EconomicAssessment';
-import './Dashboard.css';
+  AlertTriangle,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useCity } from "../contexts/CityContext";
+import HealthVisualization from "./HealthVisualization";
+import Analytics from "./Analytics";
+import EconomicAssessment from "./EconomicAssessment";
+import "./Dashboard.css";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { getCurrentCityStats } = useCity();
-  const [activeTab, setActiveTab] = useState('health');
+  const [activeTab, setActiveTab] = useState("health");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleLogoClick = () => {
-    navigate('/');
+    navigate("/");
   };
 
   const tabs = [
-    { id: 'health', label: 'Health Visualization', icon: Activity },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'economic', label: 'Economic Assessment', icon: DollarSign },
+    { id: "health", label: "Health Visualization", icon: Activity },
+    { id: "analytics", label: "Analytics", icon: BarChart3 },
+    { id: "economic", label: "Economic Assessment", icon: DollarSign },
   ];
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'health':
+      case "health":
         return <HealthVisualization />;
-      case 'analytics':
+      case "analytics":
         return <Analytics />;
-      case 'economic':
+      case "economic":
         return <EconomicAssessment />;
       default:
         return <HealthVisualization />;
@@ -49,8 +49,8 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       {/* Sidebar */}
-      <motion.aside 
-        className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}
+      <motion.aside
+        className={`sidebar ${sidebarOpen ? "open" : "closed"}`}
         initial={{ x: -300 }}
         animate={{ x: sidebarOpen ? 0 : -300 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -58,9 +58,9 @@ const Dashboard = () => {
         <div className="sidebar-header">
           <div className="logo-container" onClick={handleLogoClick}>
             <Zap className="logo-icon electric-pulse" />
-            <span className="logo-text text-electric">LifeWire</span>
+            <span className="logo-text text-electric">LiveWire</span>
           </div>
-          <button 
+          <button
             className="sidebar-toggle"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
@@ -74,7 +74,7 @@ const Dashboard = () => {
             return (
               <motion.button
                 key={tab.id}
-                className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
+                className={`nav-item ${activeTab === tab.id ? "active" : ""}`}
                 onClick={() => setActiveTab(tab.id)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -82,7 +82,7 @@ const Dashboard = () => {
                 <Icon className="nav-icon" />
                 <span className="nav-label">{tab.label}</span>
                 {activeTab === tab.id && (
-                  <motion.div 
+                  <motion.div
                     className="nav-indicator"
                     layoutId="nav-indicator"
                     initial={false}
@@ -121,15 +121,18 @@ const Dashboard = () => {
         <header className="content-header">
           <div className="header-info">
             <h1 className="page-title">
-              {tabs.find(tab => tab.id === activeTab)?.label}
+              {tabs.find((tab) => tab.id === activeTab)?.label}
             </h1>
             <p className="page-subtitle">
-              {activeTab === 'health' && 'Real-time monitoring of cable health across the city'}
-              {activeTab === 'analytics' && 'Detailed analysis of cable parameters and health trends'}
-              {activeTab === 'economic' && 'Cost analysis and economic impact assessment'}
+              {activeTab === "health" &&
+                "Real-time monitoring of cable health across the city"}
+              {activeTab === "analytics" &&
+                "Detailed analysis of cable parameters and health trends"}
+              {activeTab === "economic" &&
+                "Cost analysis and economic impact assessment"}
             </p>
           </div>
-          
+
           {/* Network Stats */}
           <div className="network-stats-header">
             <div className="stat-item">
@@ -137,11 +140,15 @@ const Dashboard = () => {
               <div className="stat-label">Individual Cables</div>
             </div>
             <div className="stat-item">
-              <div className="stat-number">{getCurrentCityStats().capacity}</div>
+              <div className="stat-number">
+                {getCurrentCityStats().capacity}
+              </div>
               <div className="stat-label">Total Capacity</div>
             </div>
             <div className="stat-item">
-              <div className="stat-number">{getCurrentCityStats().operational}</div>
+              <div className="stat-number">
+                {getCurrentCityStats().operational}
+              </div>
               <div className="stat-label">Operational</div>
             </div>
           </div>
