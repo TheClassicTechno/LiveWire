@@ -17,12 +17,11 @@ const LosAngelesMap = () => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [cableAnimations, setCableAnimations] = useState({});
   const [cityMovement, setCityMovement] = useState(false);
   const [selectedCable, setSelectedCable] = useState(null);
   const [riskAssessment, setRiskAssessment] = useState(null);
   const [isLoadingRisk, setIsLoadingRisk] = useState(false);
-  const { currentCity, setCurrentCity, getCurrentCityStats } = useCity();
+  const { currentCity, setCurrentCity } = useCity();
 
   // Load real transmission data based on current city
   const { data: transmissionData } = useTransmissionDataByCity(currentCity);
@@ -106,13 +105,8 @@ const LosAngelesMap = () => {
         console.log('Map loaded successfully!');
         setMapLoaded(true);
 
-        // Start cable animations
+        // Start city movement animation
         setTimeout(() => {
-          setCableAnimations({
-            bundles: true,
-            cables: true,
-            sensors: true
-          });
           setCityMovement(true);
         }, 1000);
       });
@@ -177,34 +171,7 @@ const LosAngelesMap = () => {
       console.log('✅ Added transmission-lines-real layer');
     }
 
-    // Add tower layer
-    if (!map.current.getLayer('transmission-towers-real')) {
-      console.log('Adding transmission-towers-real layer');
-      map.current.addLayer({
-        id: 'transmission-towers-real',
-        type: 'circle',
-        source: 'cable-network',
-        filter: ['==', ['geometry-type'], 'Point'],
-        paint: {
-          'circle-color': ['get', 'color'],
-          'circle-radius': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            10, 3,
-            15, 5,
-            17, 7,
-            20, 10
-          ],
-          'circle-stroke-color': '#ffffff',
-          'circle-stroke-width': 2,
-          'circle-opacity': 0.9
-        }
-      });
-      console.log('✅ Added transmission-towers-real layer');
-    }
-
-    // Add interactive event handlers
+    // Add interactive event handlers for transmission lines
     map.current.on('mouseenter', 'transmission-lines-real', () => {
       map.current.getCanvas().style.cursor = 'pointer';
     });
@@ -219,27 +186,6 @@ const LosAngelesMap = () => {
         console.log('Clicked transmission line:', feature);
         assessCableRisk({
           name: feature.properties.name || 'Transmission Line',
-          voltage: feature.properties.voltage || 'Unknown',
-          temperature: Math.random() * 60 + 20 // Simulate temp 20-80°C
-        });
-        setSelectedCable(feature);
-      }
-    });
-
-    map.current.on('mouseenter', 'transmission-towers-real', () => {
-      map.current.getCanvas().style.cursor = 'pointer';
-    });
-
-    map.current.on('mouseleave', 'transmission-towers-real', () => {
-      map.current.getCanvas().style.cursor = '';
-    });
-
-    map.current.on('click', 'transmission-towers-real', (e) => {
-      if (e.features && e.features.length > 0) {
-        const feature = e.features[0];
-        console.log('Clicked tower:', feature);
-        assessCableRisk({
-          name: feature.properties.name || 'Tower',
           voltage: feature.properties.voltage || 'Unknown',
           temperature: Math.random() * 60 + 20 // Simulate temp 20-80°C
         });
@@ -356,62 +302,26 @@ const LosAngelesMap = () => {
             <div className="legend-bundle" style={{backgroundColor: '#333333'}}></div>
             <span>Cable Bundle</span>
           </motion.div>
-          <motion.div 
+          <motion.div
             className="legend-item"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, delay: 0.9 }}
           >
-            <div className="legend-line solid" style={{backgroundColor: '#ff4444'}}></div>
-            <span>Phase A</span>
-          </motion.div>
-          <motion.div 
-            className="legend-item"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: 1.0 }}
-          >
-            <div className="legend-line solid" style={{backgroundColor: '#00d4ff'}}></div>
-            <span>Phase B</span>
-          </motion.div>
-          <motion.div 
-            className="legend-item"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: 1.1 }}
-          >
-            <div className="legend-line solid" style={{backgroundColor: '#00ff88'}}></div>
-            <span>Phase C</span>
-          </motion.div>
-          <motion.div
-            className="legend-item"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: 1.2 }}
-          >
-            <div className="legend-circle" style={{backgroundColor: '#00ff88'}}></div>
-            <span>Monitor Sensor</span>
-          </motion.div>
-          <motion.div
-            className="legend-item"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: 1.3 }}
-          >
-            <div className="legend-circle" style={{backgroundColor: '#00ff88', border: '3px solid white', width: '12px', height: '12px'}}></div>
-            <span>Tower 27/222 (Camp Fire)</span>
+            <div className="legend-line solid" style={{backgroundColor: '#ff6b35'}}></div>
+            <span>Transmission Line</span>
           </motion.div>
         </motion.div>
       </motion.div>
       
-      <motion.div 
+      <motion.div
         className="map-wrapper"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.4 }}
       >
         <div ref={mapContainer} className="map-container" />
-        
+
         {/* Animated Moving Elements */}
         {cityMovement && (
           <>

@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react';
-import { fetchTransmissionDataCached, clearCache } from '../data/transmissionData';
+import { fetchTransmissionDataCached } from '../data/transmissionData';
 import { CITY_CONFIG } from '../data/cityConfig';
 
 /**
  * Hook to load real transmission data for a specific city
  * @param {string} cityKey - The city key from CITY_CONFIG (e.g., 'paradise', 'los-angeles', 'san-francisco')
- * @returns {Object} - { data, loading, error, cityName }
+ * @returns {Object} - { data, loading, error, cityName, loadingPercent }
  */
 export const useTransmissionDataByCity = (cityKey) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loadingPercent, setLoadingPercent] = useState(0);
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
+      setLoadingPercent(0);
       setError(null);
 
       try {
@@ -31,6 +33,17 @@ export const useTransmissionDataByCity = (cityKey) => {
 
         console.log(`Loading transmission data for ${cityConfig.name} (${regionKey})`);
 
+        // Add staggered delay to prevent all cities from hammering Overpass API simultaneously
+        // This helps avoid rate limiting and API timeouts
+        const cityIndex = Object.keys(CITY_CONFIG).indexOf(cityKey);
+        const delayMs = cityIndex * 500; // 0ms, 500ms, 1000ms for first, second, third city
+
+        if (delayMs > 0) {
+          console.log(`Staggering request by ${delayMs}ms to avoid API rate limits...`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+
+        // Use simple caching approach
         const transmissionData = await fetchTransmissionDataCached(regionKey);
 
         // Convert transmission data to cable network format for compatibility
@@ -38,6 +51,7 @@ export const useTransmissionDataByCity = (cityKey) => {
         const convertedData = convertTransmissionToCableFormat(transmissionData, cityConfig);
 
         setData(convertedData);
+        setLoadingPercent(100);
       } catch (err) {
         console.error(`Error loading transmission data for ${cityKey}:`, err);
         setError(err.message);
@@ -56,6 +70,7 @@ export const useTransmissionDataByCity = (cityKey) => {
     data,
     loading,
     error,
+    loadingPercent,
     cityName: cityConfig.name || cityKey
   };
 };
@@ -78,29 +93,23 @@ const convertTransmissionToCableFormat = (transmissionData, cityConfig) => {
 
   const cityColor = cityColors[cityConfig.key] || '#00ff88';
 
-  const convertedFeatures = transmissionData.features.map(feature => {
-    const isLine = feature.geometry?.type === 'LineString';
-    const isPoint = feature.geometry?.type === 'Point';
-
-    // Only keep lines and points (ignore other geometry types)
-    if (!isLine && !isPoint) {
-      return null;
-    }
-
-    return {
-      type: 'Feature',
-      properties: {
-        ...feature.properties,
-        // Add cable network format properties for layer compatibility
-        color: isLine ? cityColor : '#00d4ff', // Lines use city color, towers use cyan
-        type: isLine ? 'transmission-line' : 'tower',
-        voltage: feature.properties.voltage || 'Unknown',
-        operator: feature.properties.operator || 'Unknown',
-        source: 'OpenStreetMap'
-      },
-      geometry: feature.geometry
-    };
-  }).filter(f => f !== null);
+  const convertedFeatures = transmissionData.features
+    .filter(feature => feature.geometry?.type === 'LineString') // Only keep lines, skip towers
+    .map(feature => {
+      return {
+        type: 'Feature',
+        properties: {
+          ...feature.properties,
+          // Add cable network format properties for layer compatibility
+          color: cityColor,
+          type: 'transmission-line',
+          voltage: feature.properties.voltage || 'Unknown',
+          operator: feature.properties.operator || 'Unknown',
+          source: 'OpenStreetMap'
+        },
+        geometry: feature.geometry
+      };
+    });
 
   return {
     type: 'FeatureCollection',
