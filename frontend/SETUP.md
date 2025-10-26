@@ -1,17 +1,19 @@
-# LifeWire Setup Instructions
+# LiveWire Setup Instructions
 
 ## 🔐 Environment Variables Setup
 
 1. **Copy the environment template:**
+
    ```bash
    cp .env.example .env
    ```
 
 2. **Fill in your API keys in `.env`:**
+
    ```bash
    # Get your Mapbox token from: https://account.mapbox.com/access-tokens/
    REACT_APP_MAPBOX_TOKEN=your_mapbox_token_here
-   
+
    # Get your Anthropic API key from: https://console.anthropic.com/
    REACT_APP_ANTHROPIC_API_KEY=your_anthropic_api_key_here
    ```
@@ -19,11 +21,13 @@
 ## 🚀 Installation & Running
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Start the development server:**
+
    ```bash
    npm start
    ```
@@ -34,11 +38,13 @@
 ## 🔑 Required API Keys
 
 ### Mapbox API Key
+
 - **Purpose**: 3D city maps and world visualization
 - **Get it from**: https://account.mapbox.com/access-tokens/
 - **Required scopes**: `styles:read`, `fonts:read`, `datasets:read`
 
 ### Anthropic Claude API Key
+
 - **Purpose**: AI-powered cable risk assessment
 - **Get it from**: https://console.anthropic.com/
 - **Required**: Valid Anthropic account with API access
@@ -75,6 +81,7 @@ src/
 ## 🚀 Deployment
 
 1. **Build for production:**
+
    ```bash
    npm run build
    ```

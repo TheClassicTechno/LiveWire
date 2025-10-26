@@ -1,4 +1,4 @@
-# LifeWire - AI-Powered Cable Monitoring System
+# LiveWire - AI-Powered Cable Monitoring System
 
 A stunning, modern React application for monitoring electrical cable health in smart cities using AI predictions and real-time sensor data.
 
@@ -22,7 +22,7 @@ A stunning, modern React application for monitoring electrical cable health in s
 
 ## 🎨 Design Features
 
-- **Electric Color Palette**: 
+- **Electric Color Palette**:
   - Electric Blue: `#00d4ff`
   - Electric Purple: `#8b5cf6`
   - Electric Pink: `#f472b6`
@@ -35,6 +35,7 @@ A stunning, modern React application for monitoring electrical cable health in s
 ## 📱 Pages & Components
 
 ### Landing Page
+
 - Hero section with animated electric particles
 - Feature highlights with icons
 - Interactive cable visualization
@@ -42,18 +43,21 @@ A stunning, modern React application for monitoring electrical cable health in s
 - Call-to-action button
 
 ### Dashboard
+
 - Collapsible sidebar navigation
 - Real-time status indicators
 - Quick stats overview
 - Responsive layout
 
 ### Health Visualization
+
 - City map placeholder (ready for MapBox integration)
 - Cable network grid with live status
 - Individual cable metrics display
 - Color-coded health indicators
 
 ### Analytics
+
 - Parameter selection tabs (Temperature, Vibration, Strain)
 - Real-time charts with trend analysis
 - Health range indicators
@@ -61,6 +65,7 @@ A stunning, modern React application for monitoring electrical cable health in s
 - Comparison visualizations
 
 ### Economic Assessment
+
 - Key financial metrics
 - Cost savings breakdown with pie chart
 - Monthly trends analysis
@@ -70,11 +75,13 @@ A stunning, modern React application for monitoring electrical cable health in s
 ## 🚀 Getting Started
 
 1. **Install Dependencies**
+
    ```bash
    npm install
    ```
 
 2. **Start Development Server**
+
    ```bash
    npm start
    ```
@@ -101,6 +108,7 @@ A stunning, modern React application for monitoring electrical cable health in s
 ## 🏆 Hackathon Ready
 
 This application is designed to win at CalHacks and Y Combinator with:
+
 - **Modern UI/UX**: Cutting-edge design that stands out
 - **Technical Excellence**: Clean, scalable React architecture
 - **Real-world Application**: Solves actual smart city problems

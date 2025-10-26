@@ -1,49 +1,64 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  TrendingDown, 
-  Calculator, 
+import React from "react";
+import { motion } from "framer-motion";
+import {
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  Calculator,
   Target,
-  Zap
-} from 'lucide-react';
-import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import './EconomicAssessment.css';
+  Zap,
+} from "lucide-react";
+import {
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
+import "./EconomicAssessment.css";
 
 const EconomicAssessment = () => {
   // Mock data for economic analysis
   const costSavings = [
-    { category: 'Preventive Maintenance', amount: 450000, percentage: 35 },
-    { category: 'Emergency Repairs', amount: 320000, percentage: 25 },
-    { category: 'Energy Efficiency', amount: 280000, percentage: 22 },
-    { category: 'Downtime Reduction', amount: 230000, percentage: 18 }
+    { category: "Preventive Maintenance", amount: 450000, percentage: 35 },
+    { category: "Emergency Repairs", amount: 320000, percentage: 25 },
+    { category: "Energy Efficiency", amount: 280000, percentage: 22 },
+    { category: "Downtime Reduction", amount: 230000, percentage: 18 },
   ];
 
   const monthlyTrends = [
-    { month: 'Jan', savings: 85000, costs: 12000 },
-    { month: 'Feb', savings: 92000, costs: 15000 },
-    { month: 'Mar', savings: 78000, costs: 18000 },
-    { month: 'Apr', savings: 105000, costs: 14000 },
-    { month: 'May', savings: 115000, costs: 16000 },
-    { month: 'Jun', savings: 98000, costs: 13000 }
+    { month: "Jan", savings: 85000, costs: 12000 },
+    { month: "Feb", savings: 92000, costs: 15000 },
+    { month: "Mar", savings: 78000, costs: 18000 },
+    { month: "Apr", savings: 105000, costs: 14000 },
+    { month: "May", savings: 115000, costs: 16000 },
+    { month: "Jun", savings: 98000, costs: 13000 },
   ];
 
   const roiData = [
-    { name: 'Year 1', roi: 150 },
-    { name: 'Year 2', roi: 280 },
-    { name: 'Year 3', roi: 420 },
-    { name: 'Year 4', roi: 580 },
-    { name: 'Year 5', roi: 750 }
+    { name: "Year 1", roi: 150 },
+    { name: "Year 2", roi: 280 },
+    { name: "Year 3", roi: 420 },
+    { name: "Year 4", roi: 580 },
+    { name: "Year 5", roi: 750 },
   ];
 
-  const pieData = costSavings.map(item => ({
+  const pieData = costSavings.map((item) => ({
     name: item.category,
     value: item.amount,
-    color: item.category === 'Preventive Maintenance' ? 'var(--electric-green)' :
-           item.category === 'Emergency Repairs' ? 'var(--electric-blue)' :
-           item.category === 'Energy Efficiency' ? 'var(--electric-purple)' :
-           'var(--electric-orange)'
+    color:
+      item.category === "Preventive Maintenance"
+        ? "var(--electric-green)"
+        : item.category === "Emergency Repairs"
+        ? "var(--electric-blue)"
+        : item.category === "Energy Efficiency"
+        ? "var(--electric-purple)"
+        : "var(--electric-orange)",
   }));
 
   return (
@@ -51,7 +66,8 @@ const EconomicAssessment = () => {
       <div className="assessment-header">
         <h2 className="section-title">Economic Impact Analysis</h2>
         <p className="section-subtitle">
-          Comprehensive cost-benefit analysis and ROI projections for LifeWire implementation
+          Comprehensive cost-benefit analysis and ROI projections for LiveWire
+          implementation
         </p>
       </div>
 
@@ -134,12 +150,12 @@ const EconomicAssessment = () => {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   contentStyle={{
-                    backgroundColor: 'var(--dark-surface)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '8px',
-                    color: 'var(--text-primary)'
+                    backgroundColor: "var(--dark-surface)",
+                    border: "1px solid var(--border-color)",
+                    borderRadius: "8px",
+                    color: "var(--text-primary)",
                   }}
                 />
               </RechartsPieChart>
@@ -163,11 +179,11 @@ const EconomicAssessment = () => {
                   ${item.amount.toLocaleString()}
                 </div>
                 <div className="savings-bar">
-                  <div 
+                  <div
                     className="savings-progress"
-                    style={{ 
+                    style={{
                       width: `${item.percentage}%`,
-                      backgroundColor: pieData[index].color
+                      backgroundColor: pieData[index].color,
                     }}
                   />
                 </div>
@@ -183,21 +199,18 @@ const EconomicAssessment = () => {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={monthlyTrends}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-            <XAxis 
-              dataKey="month" 
+            <XAxis
+              dataKey="month"
               stroke="var(--text-secondary)"
               fontSize={12}
             />
-            <YAxis 
-              stroke="var(--text-secondary)"
-              fontSize={12}
-            />
-            <Tooltip 
+            <YAxis stroke="var(--text-secondary)" fontSize={12} />
+            <Tooltip
               contentStyle={{
-                backgroundColor: 'var(--dark-surface)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                color: 'var(--text-primary)'
+                backgroundColor: "var(--dark-surface)",
+                border: "1px solid var(--border-color)",
+                borderRadius: "8px",
+                color: "var(--text-primary)",
               }}
             />
             <Bar dataKey="savings" fill="var(--electric-green)" opacity={0.8} />
@@ -213,22 +226,22 @@ const EconomicAssessment = () => {
           <div className="roi-chart">
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={roiData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                <XAxis 
-                  dataKey="name" 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--border-color)"
+                />
+                <XAxis
+                  dataKey="name"
                   stroke="var(--text-secondary)"
                   fontSize={12}
                 />
-                <YAxis 
-                  stroke="var(--text-secondary)"
-                  fontSize={12}
-                />
-                <Tooltip 
+                <YAxis stroke="var(--text-secondary)" fontSize={12} />
+                <Tooltip
                   contentStyle={{
-                    backgroundColor: 'var(--dark-surface)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '8px',
-                    color: 'var(--text-primary)'
+                    backgroundColor: "var(--dark-surface)",
+                    border: "1px solid var(--border-color)",
+                    borderRadius: "8px",
+                    color: "var(--text-primary)",
                   }}
                 />
                 <Bar dataKey="roi" fill="var(--electric-blue)" />
@@ -258,10 +271,30 @@ const EconomicAssessment = () => {
         <div className="timeline-content">
           <div className="timeline-phases">
             {[
-              { phase: 'Phase 1: Planning & Setup', duration: '3 months', cost: '$400K', status: 'completed' },
-              { phase: 'Phase 2: Sensor Installation', duration: '6 months', cost: '$800K', status: 'in-progress' },
-              { phase: 'Phase 3: AI Integration', duration: '4 months', cost: '$600K', status: 'pending' },
-              { phase: 'Phase 4: Optimization', duration: '3 months', cost: '$300K', status: 'pending' }
+              {
+                phase: "Phase 1: Planning & Setup",
+                duration: "3 months",
+                cost: "$400K",
+                status: "completed",
+              },
+              {
+                phase: "Phase 2: Sensor Installation",
+                duration: "6 months",
+                cost: "$800K",
+                status: "in-progress",
+              },
+              {
+                phase: "Phase 3: AI Integration",
+                duration: "4 months",
+                cost: "$600K",
+                status: "pending",
+              },
+              {
+                phase: "Phase 4: Optimization",
+                duration: "3 months",
+                cost: "$300K",
+                status: "pending",
+              },
             ].map((phase, index) => (
               <motion.div
                 key={phase.phase}
