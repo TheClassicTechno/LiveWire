@@ -7,11 +7,13 @@ const ElasticsearchDashboard = () => {
   const [dashboardError, setDashboardError] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Elasticsearch Serverless Dashboard URL
+  // Elasticsearch Serverless Dashboard URLs
   const ELASTIC_DASHBOARD_URL = "https://my-elasticsearch-project-c80e6e.kb.us-west1.gcp.elastic.cloud/app/dashboards#/view/893b0606-6fc1-48f8-8f1d-4b760d160de3?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))";
+  const ELASTIC_SPACE_URL = "https://my-elasticsearch-project-c80e6e.kb.us-west1.gcp.elastic.cloud/app/r/s/oxRR4";
   
-  // For embedding, we need to add embed=true parameter
+  // For embedding, we need to add embed=true parameter  
   const EMBEDDED_DASHBOARD_URL = `${ELASTIC_DASHBOARD_URL}&embed=true`;
+  const EMBEDDED_SPACE_URL = `${ELASTIC_SPACE_URL}?embed=true`;
 
   useEffect(() => {
     // Simulate loading time
