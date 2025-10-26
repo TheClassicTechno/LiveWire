@@ -97,10 +97,10 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
       setDataSource(statusData.data_source || 'synthetic');
       setElasticAvailable(statusData.elastic_available || false);
 
-      // Add to RUL trend data (keep last 150 points = 5 minutes at 2-second intervals)
+      // Add to RUL trend data as LIVE feed (continues from baseline data's timeline)
       if (statusData.rul_prediction?.rul_hours !== undefined) {
         const newTrendPoint = {
-          timestamp: new Date().toLocaleTimeString(),
+          timestamp: `${Math.round(Date.now() / 1000)}s`, // Current Unix timestamp in seconds for x-axis
           rul: statusData.rul_prediction.rul_hours,
           riskZone: statusData.rul_prediction.risk_zone,
           dataSource: statusData.data_source,
@@ -108,7 +108,7 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
 
         setRulTrendData((prev) => {
           const updated = [...prev, newTrendPoint];
-          // Keep only last 150 points (5 minutes at 2-sec intervals)
+          // Keep last 150 points to show scrolling window of data
           return updated.slice(-150);
         });
       }
@@ -125,14 +125,14 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
         historyData = { readings: [] };
       }
 
-      // Populate LIVE graph with baseline data on first load
+      // Populate LIVE graph with baseline simulated data on first load
+      // This shows what the component's RUL looked like over time (the "history")
       if (historyData.readings && Array.isArray(historyData.readings) && rulTrendData.length === 0) {
-        // Create realistic baseline RUL data: stable around 350h, slight gradual decline
         const baselineGraphData = historyData.readings.map((reading, index) => {
           // Simulate baseline RUL: starts at 350h, gradually decreases by ~1h per reading
           const baselineRul = Math.max(200, 350 - (index * 2));
           return {
-            timestamp: `${index * 4}h`, // Roughly 4 hours per reading
+            timestamp: `${index * 2}s`, // X-axis shows elapsed seconds (0s, 2s, 4s, ... progressing left to right)
             rul: baselineRul,
             riskZone: baselineRul > 300 ? 'green' : baselineRul > 150 ? 'yellow' : 'red',
             dataSource: 'baseline',
