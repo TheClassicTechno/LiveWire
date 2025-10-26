@@ -44,6 +44,7 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
   const [speedupProgress, setSpeedupProgress] = useState(0);
   const [speedupDays, setSpeedupDays] = useState(0);
   const [speedupSummary, setSpeedupSummary] = useState(null);
+  const [speedupTrendData, setSpeedupTrendData] = useState([]); // Track speedup simulation graph data
 
   // Fetch sensor data from Phase 3 live component API
   const fetchSensorData = async () => {
@@ -215,6 +216,9 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
 
       setSpeedupSummary(data.summary);
 
+      // Initialize speedup trend data with empty array
+      setSpeedupTrendData([]);
+
       // Animate through trajectory: each day shown for 100ms
       for (let i = 0; i < trajectory.length; i++) {
         const point = trajectory[i];
@@ -233,8 +237,8 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
         setSpeedupProgress(((i + 1) / trajectory.length) * 100);
         setSpeedupDays(point.day);
 
-        // Add trajectory data to RUL trend graph
-        setRulTrendData((prev) => {
+        // Add trajectory data to SPEEDUP graph (not live graph)
+        setSpeedupTrendData((prev) => {
           const newTrendPoint = {
             timestamp: `Day ${point.day}`,
             rul: point.rul_hours,
@@ -242,8 +246,7 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
             dataSource: 'accelerated',
           };
           const updated = [...prev, newTrendPoint];
-          // Keep last 150 points (or all if accelerating)
-          return updated.slice(-150);
+          return updated; // Keep all speedup trajectory points
         });
 
         // Wait 100ms before next frame (30 days in ~3 seconds)
@@ -565,7 +568,7 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
                     </motion.div>
                   )}
 
-                  {/* Real-Time RUL Trend Section - Shows live data updates */}
+                  {/* Real-Time RUL Trend Section - Live Raspberry Pi data */}
                   {rulTrendData.length > 0 && (
                     <motion.div
                       className="panel-section"
@@ -573,12 +576,20 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.15 }}
                     >
-                      <h3 className="section-title">
-                        📊 Real-Time RUL Trend
-                        {elasticAvailable && <span style={{color: '#22c55e', marginLeft: '8px'}}>● LIVE</span>}
-                      </h3>
+                      <div className="graph-header">
+                        <div>
+                          <h3 className="section-title">
+                            📡 Live RUL Monitoring
+                            {elasticAvailable && <span style={{color: '#22c55e', marginLeft: '8px'}}>● LIVE from Pi</span>}
+                            {!elasticAvailable && <span style={{color: '#f59e0b', marginLeft: '8px'}}>● Simulated</span>}
+                          </h3>
+                          <p style={{fontSize: '11px', color: '#94a3b8', margin: '4px 0 0 0'}}>
+                            Real-time RUL prediction as Raspberry Pi sensor data flows in
+                          </p>
+                        </div>
+                      </div>
                       <div className="chart-container">
-                        <ResponsiveContainer width="100%" height={200}>
+                        <ResponsiveContainer width="100%" height={220}>
                           <LineChart data={rulTrendData}>
                             <CartesianGrid
                               strokeDasharray="3 3"
@@ -590,12 +601,14 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
                               style={{ fontSize: '10px' }}
                               tick={{ fill: '#64748b' }}
                               interval={Math.max(0, Math.floor(rulTrendData.length / 6))}
+                              label={{ value: 'Time', position: 'insideBottomRight', offset: -5, style: {fontSize: '11px', fill: '#94a3b8'} }}
                             />
                             <YAxis
                               stroke="#64748b"
                               style={{ fontSize: '10px' }}
                               tick={{ fill: '#64748b' }}
                               domain={['dataMin - 1', 'dataMax + 1']}
+                              label={{ value: 'RUL (hours)', angle: -90, position: 'insideLeft', style: {fontSize: '11px', fill: '#94a3b8'} }}
                             />
                             <Tooltip
                               contentStyle={{
@@ -604,7 +617,8 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
                                 borderRadius: '8px',
                               }}
                               labelStyle={{ color: '#e2e8f0' }}
-                              formatter={(value) => [value.toFixed(2) + 'h', 'RUL']}
+                              formatter={(value) => [value.toFixed(1) + 'h', 'RUL']}
+                              labelFormatter={(label) => `Time: ${label}`}
                             />
                             <Line
                               type="monotone"
@@ -621,18 +635,29 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
                     </motion.div>
                   )}
 
-                  {/* Historical Trend Section */}
-                  {historicalData.length > 0 && (
+                  {/* Speedup Simulation Graph - Shows 300-day projection at high speed */}
+                  {speedupTrendData.length > 0 && (
                     <motion.div
                       className="panel-section"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
                     >
-                      <h3 className="section-title">35-Day Degradation Baseline</h3>
+                      <div className="graph-header">
+                        <div>
+                          <h3 className="section-title">
+                            ⚡ Speedup Simulation (300-Day Projection)
+                            {speedupActive && <span style={{color: '#ff6b35', marginLeft: '8px'}}>● Simulating</span>}
+                            {!speedupActive && speedupTrendData.length > 0 && <span style={{color: '#8b5cf6', marginLeft: '8px'}}>● Complete</span>}
+                          </h3>
+                          <p style={{fontSize: '11px', color: '#94a3b8', margin: '4px 0 0 0'}}>
+                            Accelerated 300-day degradation simulation based on current sensor readings
+                          </p>
+                        </div>
+                      </div>
                       <div className="chart-container">
-                        <ResponsiveContainer width="100%" height={280}>
-                          <LineChart data={historicalData}>
+                        <ResponsiveContainer width="100%" height={220}>
+                          <LineChart data={speedupTrendData}>
                             <CartesianGrid
                               strokeDasharray="3 3"
                               stroke="#334155"
@@ -640,14 +665,17 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
                             <XAxis
                               dataKey="timestamp"
                               stroke="#64748b"
-                              style={{ fontSize: '12px' }}
+                              style={{ fontSize: '10px' }}
                               tick={{ fill: '#64748b' }}
-                              interval={Math.max(0, Math.floor(historicalData.length / 5))}
+                              interval={Math.max(0, Math.floor(speedupTrendData.length / 6))}
+                              label={{ value: 'Simulated Days', position: 'insideBottomRight', offset: -5, style: {fontSize: '11px', fill: '#94a3b8'} }}
                             />
                             <YAxis
                               stroke="#64748b"
-                              style={{ fontSize: '12px' }}
+                              style={{ fontSize: '10px' }}
                               tick={{ fill: '#64748b' }}
+                              domain={['dataMin - 10', 'dataMax + 10']}
+                              label={{ value: 'RUL (hours)', angle: -90, position: 'insideLeft', style: {fontSize: '11px', fill: '#94a3b8'} }}
                             />
                             <Tooltip
                               contentStyle={{
@@ -656,30 +684,33 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
                                 borderRadius: '8px',
                               }}
                               labelStyle={{ color: '#e2e8f0' }}
+                              formatter={(value) => [value.toFixed(1) + 'h', 'RUL']}
+                              labelFormatter={(label) => `${label}`}
                             />
-                            <Legend />
                             <Line
                               type="monotone"
                               dataKey="rul"
-                              stroke="#00d4ff"
+                              stroke="#ff6b35"
                               dot={false}
                               isAnimationActive={false}
-                              strokeWidth={2}
-                              name="RUL (cycles)"
-                            />
-                            <Line
-                              type="monotone"
-                              dataKey="temp"
-                              stroke="#f472b6"
-                              dot={false}
-                              isAnimationActive={false}
-                              strokeWidth={1.5}
-                              opacity={0.7}
-                              name="Temperature (°C)"
+                              strokeWidth={2.5}
+                              name="Projected RUL"
                             />
                           </LineChart>
                         </ResponsiveContainer>
                       </div>
+                      {speedupSummary && !speedupActive && (
+                        <div style={{marginTop: '12px', padding: '12px', background: 'rgba(255, 107, 53, 0.1)', borderRadius: '6px', border: '1px solid rgba(255, 107, 53, 0.2)'}}>
+                          <p style={{fontSize: '12px', color: '#e2e8f0', margin: 0}}>
+                            <strong>Projection:</strong> {speedupSummary.start_rul?.toFixed(0)}h → {speedupSummary.end_rul?.toFixed(0)}h
+                            {speedupSummary.days_to_critical < 300 && (
+                              <span style={{color: '#ff6b35', marginLeft: '12px'}}>
+                                🔴 Critical at Day {speedupSummary.days_to_critical}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      )}
                     </motion.div>
                   )}
 
