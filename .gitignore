@@ -8,7 +8,7 @@ yarn-error.log*
 build/
 dist/
 
-# Environment variables (CRITICAL - Contains API keys)
+# Environment variables 
 .env
 .env.local
 .env.development.local
