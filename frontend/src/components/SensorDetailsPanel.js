@@ -233,12 +233,25 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
         setSpeedupProgress(((i + 1) / trajectory.length) * 100);
         setSpeedupDays(point.day);
 
+        // Add trajectory data to RUL trend graph
+        setRulTrendData((prev) => {
+          const newTrendPoint = {
+            timestamp: `Day ${point.day}`,
+            rul: point.rul_hours,
+            riskZone: point.risk_zone,
+            dataSource: 'accelerated',
+          };
+          const updated = [...prev, newTrendPoint];
+          // Keep last 150 points (or all if accelerating)
+          return updated.slice(-150);
+        });
+
         // Wait 100ms before next frame (30 days in ~3 seconds)
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      // Animation complete
-      setSpeedupActive(false);
+      // Animation complete - STAY OPEN, don't set speedupActive to false
+      // setSpeedupActive(false);  // REMOVED: Keep panel open after animation
     } catch (err) {
       console.error('Speedup error:', err);
       setError(err.message);
@@ -328,12 +341,30 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
               </button>
             </div>
 
+            {/* Connection Status - Raspberry Pi */}
+            <motion.div
+              className={`connection-status ${elasticAvailable ? 'connected' : 'disconnected'}`}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="status-indicator">
+                <span className={`status-dot ${elasticAvailable ? 'connected' : 'disconnected'}`}></span>
+                <span className="status-text">
+                  {elasticAvailable ? '🟢 Raspberry Pi Connected' : '🔴 Raspberry Pi Disconnected'}
+                </span>
+              </div>
+              <span className="status-subtext">
+                {elasticAvailable ? 'Real-time data flowing from Pi → Elasticsearch' : 'Using simulated baseline data'}
+              </span>
+            </motion.div>
+
             {/* Data Source Badge */}
             <motion.div
               className={`data-source-badge ${dataSource === 'elastic' ? 'elastic' : 'synthetic'}`}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
+              transition={{ delay: 0.15 }}
             >
               {elasticAvailable ? (
                 <>
@@ -534,15 +565,18 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
                     </motion.div>
                   )}
 
-                  {/* Real-Time RUL Trend Section - NEW */}
-                  {rulTrendData.length > 5 && (
+                  {/* Real-Time RUL Trend Section - Shows live data updates */}
+                  {rulTrendData.length > 0 && (
                     <motion.div
                       className="panel-section"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.15 }}
                     >
-                      <h3 className="section-title">Live RUL Trend (5 Minutes)</h3>
+                      <h3 className="section-title">
+                        📊 Real-Time RUL Trend
+                        {elasticAvailable && <span style={{color: '#22c55e', marginLeft: '8px'}}>● LIVE</span>}
+                      </h3>
                       <div className="chart-container">
                         <ResponsiveContainer width="100%" height={200}>
                           <LineChart data={rulTrendData}>
