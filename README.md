@@ -94,7 +94,7 @@ Multiple approaches: ~50% accuracy ⚠️ POOR (proves data gap)
 
 ## 🏗️ How It Works
 
-### 1. Data Integration Pipeline (Your contribution)
+### 1. Data Integration Pipeline
 - Network topology → Realistic sensor time-series
 - Physics-based cascade simulation
 - Clean train/test splits for validation
