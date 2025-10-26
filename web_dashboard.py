@@ -24,13 +24,23 @@ app = Flask(__name__)
 # Register blueprints
 from backend.elasticsearch_proxy import bp as elasticsearch_bp
 from backend.rul_api import bp as rul_bp
+from backend.rul_elasticsearch_integration import bp as rul_elasticsearch_bp
 
 app.register_blueprint(elasticsearch_bp)
 app.register_blueprint(rul_bp)
+app.register_blueprint(rul_elasticsearch_bp)
 
 # Initialize RUL model
 from backend.rul_api import load_rul_artifacts
 load_rul_artifacts()
+
+# Initialize RUL Elasticsearch manager
+from backend.rul_elasticsearch_integration import rul_manager
+try:
+    rul_manager.connect()
+    print("✅ RUL Elasticsearch integration ready")
+except Exception as e:
+    print(f"⚠️ RUL Elasticsearch connection failed: {e}")
 
 class LiveWireDataFetcher:
     """Fetches data from Elastic Serverless for dashboard"""
