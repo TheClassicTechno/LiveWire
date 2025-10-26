@@ -434,26 +434,11 @@ const LandingPage = () => {
             </div>
 
             <nav className="main-nav">
-              <a href="#products" className="nav-link">
-                Products
-              </a>
-              <a href="#solutions" className="nav-link">
-                Solutions
-              </a>
               <a href="#developers" className="nav-link">
-                Developers
-              </a>
-              <a href="#company" className="nav-link">
-                Company
-              </a>
-              <a href="#resources" className="nav-link">
-                Resources
-              </a>
-              <a href="#pricing" className="nav-link">
-                Pricing
+                About Us
               </a>
               <a href="#contact" className="nav-link">
-                Contact us
+                Contact
               </a>
             </nav>
 
@@ -652,16 +637,16 @@ const LandingPage = () => {
               </div>
               <div className="map-stats">
                 <div className="stat-item">
-                  <span className="stat-number">50+</span>
-                  <span className="stat-label">Countries</span>
-                </div>
-                <div className="stat-item">
                   <span className="stat-number">1M+</span>
                   <span className="stat-label">Cables Monitored</span>
                 </div>
                 <div className="stat-item">
                   <span className="stat-number">24/7</span>
-                  <span className="stat-label">Global Coverage</span>
+                  <span className="stat-label">Live Coverage</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-number">300+</span>
+                  <span className="stat-label">Days to Prepare</span>
                 </div>
               </div>
             </div>
