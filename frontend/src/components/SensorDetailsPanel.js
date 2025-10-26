@@ -137,7 +137,7 @@ const SensorDetailsPanel = ({ isOpen, onClose }) => {
       // Populate LIVE graph with baseline simulated data on first load
       // This shows what the component's RUL looked like over time (the "history")
       if (historyData.readings && Array.isArray(historyData.readings) && rulTrendData.length === 0) {
-        const baselineGraphData = historyData.readings.map((index) => {
+        const baselineGraphData = historyData.readings.map((_, index) => {
           // Simulate baseline RUL: mostly stable around 300-320h with small random variations
           // This represents the "natural" RUL trend before any dramatic degradation
           const baseRul = 310;
