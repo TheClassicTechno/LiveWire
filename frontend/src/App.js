@@ -4,7 +4,7 @@ import { CityProvider } from './contexts/CityContext';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 import ParadiseDemoMap from './components/ParadiseDemoMap';
-import ElasticsearchDashboard from './components/ElasticsearchDashboard';
+import LiveElasticsearchDashboard from './components/LiveElasticsearchDashboard';
 import './App.css';
 
 function App() {
@@ -16,7 +16,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/camp-fire-demo" element={<ParadiseDemoMap />} />
-            <Route path="/elasticsearch" element={<ElasticsearchDashboard />} />
+            <Route path="/elasticsearch" element={<LiveElasticsearchDashboard />} />
           </Routes>
         </div>
       </Router>
