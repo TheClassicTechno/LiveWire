@@ -7,13 +7,15 @@ import {
   DollarSign,
   Menu,
   X,
-  AlertTriangle
+  AlertTriangle,
+  Radio
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCity } from '../contexts/CityContext';
 import Analytics from './Analytics';
 import EconomicAssessment from './EconomicAssessment';
 import LosAngelesMap from './LosAngelesMap';
+import LiveMetrics from './LiveMetrics';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -37,6 +39,7 @@ const Dashboard = () => {
     { id: 'paradise', label: 'Paradise (Camp Fire)', icon: AlertTriangle },
     { id: 'la', label: 'Los Angeles', icon: Activity },
     { id: 'sf', label: 'San Francisco', icon: Activity },
+    { id: 'live', label: 'Live Data', icon: Radio },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'economic', label: 'Economic Assessment', icon: DollarSign },
   ];
@@ -56,6 +59,9 @@ const Dashboard = () => {
     }
     if (activeTab === 'economic') {
       return <EconomicAssessment />;
+    }
+    if (activeTab === 'live') {
+      return <LiveMetrics />;
     }
     // For all city tabs (paradise, la, sf), render the same persistent map
     // The map updates internally based on currentCity from CityContext
