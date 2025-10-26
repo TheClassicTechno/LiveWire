@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCity } from '../contexts/CityContext';
-import { useTransmissionDataByCity } from '../hooks/useTransmissionDataByCity';
 import Analytics from './Analytics';
 import EconomicAssessment from './EconomicAssessment';
 import LosAngelesMap from './LosAngelesMap';
@@ -19,8 +18,7 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { currentCity, getCurrentCityStats, setCurrentCity } = useCity();
-  const { loading: dataLoading } = useTransmissionDataByCity(currentCity);
+  const { getCurrentCityStats, setCurrentCity } = useCity();
   const [activeTab, setActiveTab] = useState('health');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -190,19 +188,6 @@ const Dashboard = () => {
             </motion.div>
           </AnimatePresence>
         </div>
-
-        {/* Loading Overlay */}
-        {dataLoading && (
-          <motion.div
-            className="dashboard-loading-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="dashboard-loading-spinner"></div>
-            <p>Loading transmission data...</p>
-          </motion.div>
-        )}
       </main>
     </div>
   );
