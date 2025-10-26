@@ -15,7 +15,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from models.grid_risk_model import CCIPipeline, CCIPipelineConfig, validate_predictions_vs_cable_state, backtest_warning_lead_time
-from data_loader import load_kaggle_cable_dataset, create_sample_datasets
+from experiments.data_loader import load_kaggle_cable_dataset, create_sample_datasets
 import pandas as pd
 from datetime import datetime, timedelta
 import json
@@ -31,7 +31,7 @@ def run_complete_test():
         csv_path = "./data/raw/cable_monitoring_dataset.csv"
         if not os.path.exists(csv_path):
             print("Kaggle dataset not found, creating synthetic data...")
-            from data_loader import create_synthetic_test_data
+            from experiments.data_loader import create_synthetic_test_data
             csv_path = create_synthetic_test_data()
         
         mapped_df = load_kaggle_cable_dataset(csv_path)
