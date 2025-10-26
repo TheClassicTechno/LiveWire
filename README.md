@@ -7,8 +7,17 @@
 [![Champion Model](https://img.shields.io/badge/🏆_Gradient_Boosting-99.73%25-brightgreen)](./CABLE_MODEL_ANALYSIS.md)
 [![Real Data](https://img.shields.io/badge/📊_365K_Samples-Validated-success)](./test_real_dataset.py)
 [![Python 3.13](https://img.shields.io/badge/Python-3.13-blue?logo=python)](https://www.python.org/)
-[![React](https://img.shields.io/badge/React-18.2-61dafb?logo=react)](https://reactjs.org/)
+[![React 18](https://img.shields.io/badge/React-18.2-61dafb?logo=react)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-Frontend-339933?logo=node.js)](https://nodejs.org/)
 [![Elastic](https://img.shields.io/badge/Elastic-Serverless-005571?logo=elasticsearch)](https://www.elastic.co/)
+[![Scikit-Learn](https://img.shields.io/badge/scikit--learn-ML-F7931E?logo=scikit-learn)](https://scikit-learn.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-Neural%20Networks-EE4C2C?logo=pytorch)](https://pytorch.org/)
+[![NetworkX](https://img.shields.io/badge/NetworkX-Grid%20Analysis-yellow?logo=python)](https://networkx.org/)
+[![Mapbox](https://img.shields.io/badge/Mapbox-GL%20Maps-000000?logo=mapbox)](https://www.mapbox.com/)
+[![Framer Motion](https://img.shields.io/badge/Framer-Motion-0055FF?logo=framer)](https://www.framer.com/motion/)
+[![Recharts](https://img.shields.io/badge/Recharts-Charts-ff7300?logo=react)](https://recharts.org/)
+[![React Router](https://img.shields.io/badge/React%20Router-6-CA4245?logo=react-router)](https://reactrouter.com/)
+[![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-IoT%20Hardware-A22265?logo=raspberry-pi)](https://www.raspberrypi.org/)
 
 ---
 
@@ -66,9 +75,30 @@ Unlike pure data approaches, we combine:
 
 ---
 
-## 🎯 Quick Demo
+### Quick Start Guide
+```bash
+# Navigate to frontend
+cd frontend
 
-**3 Commands to See the Magic:**
+# Install and run
+npm install
+npm start
+# Opens at localhost:3000
+```
+
+### Real-time data pipeline from IoT sensors 
+```bash
+# Start sensor simulation
+python hardware/raspberry_pi_sensor.py
+
+# Monitor in real-time
+python database/realtime_reader.py
+
+# View live dashboard
+# https://my-elasticsearch-project-c80e6e.kb.us-west1.gcp.elastic.cloud
+```
+
+**Our predictive modelling approach**
 
 ```bash
 # Test 1: Camp Fire Prediction (308 days)
@@ -82,8 +112,8 @@ python scripts/run_all_analyses.py
 ```
 
 **Live Dashboards:**
-- 📊 [Elastic Serverless Dashboard](https://my-elasticsearch-project-c80e6e.kb.us-west1.gcp.elastic.cloud) — Real-time sensor data
-- 🎨 Frontend Dashboard — Interactive city visualizations
+- 📊 [Elastic Serverless Dashboard](https://my-elasticsearch-project-c80e6e.kb.us-west1.gcp.elastic.cloud) — Real-time sensor data (for demo purposes)
+- 🎨 Frontend Dashboard — Interactive city visualizations (this is our client-facing final product)
 
 ---
 
@@ -165,9 +195,7 @@ This validates our core thesis: **Deploy real IoT sensors for breakthrough accur
 
 ---
 
-## 🏃‍♂️ Quick Start
-
-### Backend Setup
+<!-- ### Backend Setup
 ```bash
 # Clone and setup
 git clone https://github.com/marianaisaw/LiveWire.git
@@ -180,30 +208,9 @@ pip install -r requirements.txt
 
 # Test the AI models
 python scripts/test_camp_fire.py
-```
+``` -->
 
-### Frontend Setup
-```bash
-# Navigate to frontend
-cd frontend
 
-# Install and run
-npm install
-npm start
-# Opens at localhost:3000
-```
-
-### Real-Time Data Pipeline
-```bash
-# Start sensor simulation
-python hardware/raspberry_pi_sensor.py
-
-# Monitor in real-time
-python database/realtime_reader.py
-
-# View live dashboard
-# https://my-elasticsearch-project-c80e6e.kb.us-west1.gcp.elastic.cloud
-```
 
 ---
 
