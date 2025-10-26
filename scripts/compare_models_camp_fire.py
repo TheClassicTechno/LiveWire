@@ -17,7 +17,7 @@ import time
 
 # Import both models
 from models.grid_risk_model import CCIPipeline, CCIPipelineConfig, validate_predictions_vs_cable_state, backtest_warning_lead_time
-from model import CCIModel, timeseries_to_feature_matrix, generate_synthetic_dataset
+from models.legacy_model import CCIModel, timeseries_to_feature_matrix, generate_synthetic_dataset
 
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import warnings
@@ -313,7 +313,7 @@ def compare_models():
     
     # Generate realistic Camp Fire data
     print("Generating Camp Fire data...")
-    from generate_camp_fire_data import generate_camp_fire_data, save_camp_fire_datasets
+    from utils.generate_camp_fire_data import generate_camp_fire_data, save_camp_fire_datasets
     
     df = generate_camp_fire_data(
         start_date="2016-01-01",
