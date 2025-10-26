@@ -267,13 +267,25 @@ pip install elasticsearch
 
 Expected index: `metrics-livewire.sensors-default`
 
-Expected fields:
+Expected structure:
+```json
+{
+  "sensor_data": {
+    "temperature": 25.5,
+    "vibration": 0.12,
+    "strain": 105.0
+  },
+  "@timestamp": "2025-10-26T12:00:00Z"
+}
+```
+
+Expected fields (3 knobs = 3 fields):
+- `sensor_data.temperature` (float) - °C (range: 15-45)
+- `sensor_data.vibration` (float) - g-force (range: 0.05-2.0)
+- `sensor_data.strain` (float) - microstrain (range: 50-500)
 - `@timestamp` (datetime) - When the reading was taken
-- `temperature` (float) - °C
-- `vibration` (float) - g-force
-- `strain` (float) - microstrain
-- `power` (float) - Watts
-- `component_id` (optional keyword) - Component identifier
+
+**Note**: Do NOT store RUL, confidence, or risk_zone in Elasticsearch. These are calculated by the backend from the sensor readings + historical baseline. Elasticsearch is the **sensor data store** only.
 
 ---
 
@@ -307,11 +319,12 @@ from datetime import datetime
 es = Elasticsearch(['http://localhost:9200'])
 doc = {
     '@timestamp': datetime.utcnow().isoformat() + 'Z',
-    'temperature': 30.0,
-    'vibration': 0.5,
-    'strain': 150.0,
-    'power': 1000.0,
-    'component_id': 'LIVE_COMPONENT_01'
+    'sensor_data': {
+        'temperature': 30.0,
+        'vibration': 0.5,
+        'strain': 150.0,
+        'power': 1000.0
+    }
 }
 es.index(index='metrics-livewire.sensors-default', body=doc)
 print('✅ Test data sent to Elastic')

@@ -101,8 +101,16 @@ def fetch_latest_sensor_data_from_elastic(component_id: str = "LIVE_COMPONENT_01
     Returns a dict with sensor values that can be used to update current reading.
     Returns None if Elastic is unavailable or no data found.
 
-    Expected Elastic index: metrics-livewire.sensors-default
-    Expected fields: temperature, vibration, strain, power (from Raspberry Pi)
+    Expected Elastic structure (nested under sensor_data):
+    {
+      "sensor_data": {
+        "temperature": 25.5,
+        "vibration": 0.12,
+        "strain": 105.0,
+        "power": 1050.0
+      },
+      "@timestamp": "2025-10-26T12:00:00Z"
+    }
     """
     es = get_elasticsearch_client()
     if not es:
@@ -130,13 +138,18 @@ def fetch_latest_sensor_data_from_elastic(component_id: str = "LIVE_COMPONENT_01
 
         latest = hits[0]["_source"]
 
-        # Map Elastic sensor fields to our 21-sensor format
-        # For now, use the available sensor values and preserve the structure
+        # Extract sensor_data from nested structure
+        sensor_data = latest.get("sensor_data", {})
+
+        if not sensor_data:
+            return None
+
+        # Extract values with fallbacks
         return {
-            "temperature": latest.get("temperature", 350.0),
-            "vibration": latest.get("vibration", 100.0),
-            "strain": latest.get("strain", 100.0),
-            "power": latest.get("power", 1000.0),
+            "temperature": sensor_data.get("temperature", 25.0),
+            "vibration": sensor_data.get("vibration", 0.1),
+            "strain": sensor_data.get("strain", 100.0),
+            "power": sensor_data.get("power", 1000.0),
             "timestamp": latest.get("@timestamp"),
             "from_elastic": True
         }
@@ -150,11 +163,11 @@ def build_sensor_reading_from_elastic(elastic_data: dict, baseline_reading: dict
     """
     Build a complete sensor reading by merging Elastic real-time data with baseline structure.
 
-    Elastic provides: temperature, vibration, strain, power
+    Elastic provides (3 knobs): temperature, vibration, strain
     We need to map these to our 21-sensor format using the baseline structure.
 
     Args:
-        elastic_data: Real-time sensor data from Elasticsearch (temperature, vibration, strain, power)
+        elastic_data: Real-time sensor data from Elasticsearch (temperature, vibration, strain)
         baseline_reading: Template sensor reading with all 21 sensors + operational settings
 
     Returns:
@@ -166,35 +179,28 @@ def build_sensor_reading_from_elastic(elastic_data: dict, baseline_reading: dict
     # Make a copy to avoid modifying the original
     updated = baseline_reading.copy()
 
-    # Map Elastic fields to our sensor model
-    # We'll scale the Elastic values proportionally to the baseline range
+    # Map 3 Elastic knob values to our sensor model
+    # We'll scale the values proportionally to the baseline range
 
-    # Temperature (typically sensor_2 in our model, range 350-500)
+    # Knob 1: Temperature (typically sensor_2 in our model, range 350-500)
     if "temperature" in elastic_data:
-        # Elastic temp range: 15-45°C, map to our 350-500 range
-        elastic_temp = elastic_data["temperature"]
-        scaled_temp = 350 + (elastic_temp - 15) * (500 - 350) / (45 - 15)
+        # Knob temp range: 15-45°C, map to our 350-500 range
+        knob_temp = elastic_data["temperature"]
+        scaled_temp = 350 + (knob_temp - 15) * (500 - 350) / (45 - 15)
         updated["sensor_2"] = max(350, min(500, scaled_temp))
 
-    # Vibration (typically sensor_1, range 100-150)
+    # Knob 2: Vibration (typically sensor_1, range 100-150)
     if "vibration" in elastic_data:
-        # Elastic vibration range: 0.05-2.0 g-force, map to 100-150
-        elastic_vib = elastic_data["vibration"]
-        scaled_vib = 100 + (elastic_vib - 0.05) * (150 - 100) / (2.0 - 0.05)
+        # Knob vibration range: 0.05-2.0 g-force, map to 100-150
+        knob_vib = elastic_data["vibration"]
+        scaled_vib = 100 + (knob_vib - 0.05) * (150 - 100) / (2.0 - 0.05)
         updated["sensor_1"] = max(100, min(150, scaled_vib))
 
-    # Strain (typically sensor_3, range 50-200 or similar)
+    # Knob 3: Strain (typically sensor_3, range 50-500)
     if "strain" in elastic_data:
-        elastic_strain = elastic_data["strain"]
-        # Assume elastic strain range is 50-500 microstrain, map to sensor scale
-        updated["sensor_3"] = max(50, min(500, elastic_strain))
-
-    # Power/Load (might map to operational setting or additional sensor)
-    if "power" in elastic_data:
-        # Power: 800-1500W, normalize to 0-1 range for op_setting_3
-        elastic_power = elastic_data["power"]
-        normalized_power = (elastic_power - 800) / (1500 - 800)
-        updated["op_setting_3"] = max(0.0, min(1.0, normalized_power))
+        knob_strain = elastic_data["strain"]
+        # Knob strain range is 50-500 microstrain, map directly to sensor scale
+        updated["sensor_3"] = max(50, min(500, knob_strain))
 
     return updated
 
