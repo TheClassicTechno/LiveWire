@@ -62,8 +62,8 @@ def engineer_features(sensor_readings: dict, previous_readings: list = None) -> 
         Feature vector (numpy array) ready for model prediction
     """
 
-    # Extract sensor values (filter out sensors 21-26 which are all NaN)
-    sensor_cols = [f'sensor_{i}' for i in range(1, 21)]  # sensors 1-20 only
+    # Extract sensor values (use sensors 1-21 as trained)
+    sensor_cols = [f'sensor_{i}' for i in range(1, 22)]  # sensors 1-21
     sensor_values = np.array([sensor_readings.get(col, 0) for col in sensor_cols])
 
     # Operational settings
@@ -361,11 +361,4 @@ def model_info():
     }), 200
 
 
-@bp.before_app_serving
-def initialize_rul_model():
-    """Load RUL model when Flask app starts"""
-    logger.info("🚀 Initializing RUL model...")
-    if load_rul_artifacts():
-        logger.info("✅ RUL API ready")
-    else:
-        logger.warning("⚠️ RUL model failed to load - predictions will fail")
+# RUL model is loaded directly in web_dashboard.py on startup
